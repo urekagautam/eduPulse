@@ -33,7 +33,9 @@ export default function ClassLayoutDiagram({ layout, assignments = {} }) {
                         key={seat.id}
                         title={student ? student.rollNo : "empty"}
                         className={`w-9 h-7 border border-gray-400 rounded text-[9px] flex items-center justify-center ${
-                          student ? "bg-blue-100 border-blue-400 font-medium" : "bg-white"
+                          student
+                            ? "bg-[var(--color-primary-bg)] border-[var(--color-primary-border)] font-medium"
+                            : "bg-white"
                         }`}
                       >
                         {student ? student.rollNo.split("-").pop() : ""}

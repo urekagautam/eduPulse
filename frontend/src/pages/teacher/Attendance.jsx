@@ -18,9 +18,9 @@ import {
 } from "../../services/apiAttendance";
 
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const inputClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const isWeekend = (dateString) => {
@@ -81,7 +81,9 @@ export default function Attendance() {
       setError("");
       setSaveMessage("");
       try {
-        const response = await fetchTeacherAttendanceClass(selectedClassOfferingId);
+        const response = await fetchTeacherAttendanceClass(
+          selectedClassOfferingId,
+        );
         setClassData(response?.data || null);
       } catch (err) {
         setClassData(null);
@@ -140,7 +142,8 @@ export default function Attendance() {
     weekday: "long",
   });
   const isSelectedDateWeekend = isWeekend(selectedDate);
-  const isFutureDate = new Date(`${selectedDate}T00:00:00`) > new Date(`${today()}T00:00:00`);
+  const isFutureDate =
+    new Date(`${selectedDate}T00:00:00`) > new Date(`${today()}T00:00:00`);
   const isExamDay = useMemo(
     () =>
       (classData?.examSessions || []).some(
@@ -250,7 +253,9 @@ export default function Attendance() {
         })),
       );
 
-      const refreshed = await fetchTeacherAttendanceClass(selectedClassOfferingId);
+      const refreshed = await fetchTeacherAttendanceClass(
+        selectedClassOfferingId,
+      );
       setClassData(refreshed?.data || null);
       setSaveMessage(
         `Attendance saved for ${selectedDate}. Present: ${presentCount}/${students.length}`,
@@ -283,7 +288,7 @@ export default function Attendance() {
 
         {loadingContext ? (
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+            <RefreshCw className="h-4 w-4 animate-spin text-[var(--color-primary)]" />
             Loading assigned classes...
           </div>
         ) : assignments.length === 0 ? (
@@ -383,7 +388,8 @@ export default function Attendance() {
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-3">
                     <p className="flex items-center gap-2 text-sm font-medium text-amber-900">
                       <CalendarX className="h-4 w-4" />
-                      Weekend selected - you can still update saved attendance if needed
+                      Weekend selected - you can still update saved attendance
+                      if needed
                     </p>
                   </div>
                 ) : (
@@ -403,7 +409,7 @@ export default function Attendance() {
                 className={`flex gap-3 rounded-lg px-4 py-3 text-sm ${
                   isExamDay
                     ? "border border-green-200 bg-green-50 text-green-900"
-                    : "border border-blue-200 bg-blue-50 text-blue-900"
+                    : "border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
                 }`}
               >
                 <Info className="h-5 w-5 shrink-0" />
@@ -425,7 +431,7 @@ export default function Attendance() {
                 </div>
               ) : loadingClass ? (
                 <div className="rounded-lg border border-gray-200 bg-white py-12 text-center text-gray-600">
-                  <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+                  <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
                   Loading attendance...
                 </div>
               ) : students.length === 0 ? (
@@ -442,7 +448,11 @@ export default function Attendance() {
                     >
                       Mark all present
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleClearAll}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearAll}
+                    >
                       Clear all
                     </Button>
                   </div>
@@ -491,7 +501,7 @@ export default function Attendance() {
                                         [student._id]: event.target.checked,
                                       }))
                                     }
-                                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                    className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                                     aria-label={`Present for ${student.name}`}
                                   />
                                 </td>
@@ -622,7 +632,7 @@ export default function Attendance() {
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   Search student
                 </label>
-                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200">
+                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus-within:border-[var(--color-primary-border)] focus-within:ring-2 focus-within:ring-[var(--color-primary-bg)]">
                   <Search className="mr-2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
@@ -663,19 +673,19 @@ export default function Attendance() {
                         </p>
                         <div className="space-y-1 text-sm">
                           <p className="text-gray-700">
-                            Present: {" "}
+                            Present:{" "}
                             <span className="font-semibold text-green-700">
                               {summary.present}
                             </span>
                           </p>
                           <p className="text-gray-700">
-                            Absent: {" "}
+                            Absent:{" "}
                             <span className="font-semibold text-red-700">
                               {summary.absent}
                             </span>
                           </p>
                           <p className="text-gray-700">
-                            %: {" "}
+                            %:{" "}
                             <span className="font-semibold">
                               {summary.percentage}%
                             </span>

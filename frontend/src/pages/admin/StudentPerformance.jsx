@@ -5,7 +5,7 @@ import { fetchFaculties } from "../../services/apiFaculty";
 import { fetchPerformanceLedger } from "../../services/apiPerformance";
 
 const fieldClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const getLevelOptions = (faculty) => {
@@ -186,7 +186,7 @@ export default function StudentPerformance() {
           <button
             type="button"
             onClick={() => navigate("/admin/student-performance")}
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+            className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-strong)]"
           >
             <ArrowLeft className="w-5 h-5" /> Back to result ledger
           </button>
@@ -494,7 +494,7 @@ export default function StudentPerformance() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+      <div className="rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] p-4 text-sm text-[var(--color-primary-strong)]">
         GPA, rank, and cumulative GPA are calculated only after every subject in
         the selected exam has marks. Incomplete rows stay pending until teachers
         finish entering marks.
@@ -502,7 +502,7 @@ export default function StudentPerformance() {
 
       {loading ? (
         <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-gray-600">
-          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
           Loading result ledger...
         </div>
       ) : selectedBatch && currentExam && subjects.length > 0 ? (
@@ -548,7 +548,7 @@ export default function StudentPerformance() {
                           : row.complete
                             ? "bg-white"
                             : "bg-amber-50/35"
-                    } hover:bg-blue-50/50`}
+                    } hover:bg-[var(--color-primary-bg)]/50`}
                   >
                     <td className="sticky left-0 z-10 min-w-60 border-t border-gray-100 bg-inherit px-4 py-3 text-gray-900">
                       <div className="flex items-start justify-between gap-3">
@@ -560,7 +560,7 @@ export default function StudentPerformance() {
                         </div>
                         <Link
                           to={`/admin/student-performance/${row.student.studentId}?${viewQuery}`}
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)] hover:bg-[var(--color-primary-bg)]"
                           title="View student performance"
                           aria-label={`View performance for ${row.student.name}`}
                         >

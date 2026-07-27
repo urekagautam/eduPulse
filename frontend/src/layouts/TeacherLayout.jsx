@@ -36,19 +36,19 @@ export default function TeacherLayout() {
       "w-full flex items-center rounded-xl text-gray-600 transition-all",
       sidebarOpen ? "gap-3 px-4 py-3" : "justify-center p-3",
       isActive
-        ? "bg-blue-50 text-blue-600"
-        : "hover:bg-blue-50/70 hover:text-blue-600",
+        ? "bg-[var(--color-primary-bg)] text-[var(--color-primary)]"
+        : "hover:bg-[var(--color-primary-bg)] hover:text-[var(--color-primary)]",
     ].join(" ");
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans">
+    <div className="flex h-screen bg-gray-50 font-sans role-teacher">
       <div
         className={`${sidebarOpen ? "w-64" : "w-[4.5rem]"} bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm shrink-0`}
       >
         <div className="flex items-center justify-between p-5 border-b border-gray-200">
           {sidebarOpen && (
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0 bg-[var(--color-primary)]">
                 T
               </div>
               <div className="min-w-0">

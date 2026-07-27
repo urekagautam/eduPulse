@@ -11,6 +11,7 @@ import examRoute from "./routes/exam.route.js";
 import performanceRoute from "./routes/performance.route.js";
 import teacherMarksRoute from "./routes/teacherMarks.route.js";
 import noticeRoute from "./routes/notice.route.js";
+import resourceRoute from "./routes/resource.route.js";
 import attendanceRoute from "./routes/attendance.route.js";
 import quizRoute from "./routes/quiz.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
@@ -51,6 +52,7 @@ app.use("/api/admin/exams", examRoute);
 app.use("/api/admin/performance", performanceRoute);
 app.use("/api/teacher/marks", teacherMarksRoute);
 app.use("/api/notices", noticeRoute);
+app.use("/api/resources", resourceRoute);
 app.use("/api/attendance", attendanceRoute);
 app.use("/api/quizzes", quizRoute);
 app.use("/api/dashboard", dashboardRoute);
@@ -62,6 +64,8 @@ app.get("/", (req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
+  // Log full error for debugging
+  console.error("[global error handler]", err && err.stack ? err.stack : err);
 
   res.status(statusCode).json({
     success: false,

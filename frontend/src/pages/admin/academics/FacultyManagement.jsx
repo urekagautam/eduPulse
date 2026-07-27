@@ -4,9 +4,9 @@ import Button from "../../../components/Button.jsx";
 import { fetchFaculties, updateFaculty, deleteFaculty } from "../../../services/apiFaculty";
 
 const inputClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const SEMESTER_NAMES = [
@@ -336,7 +336,7 @@ export default function FacultyManagement() {
                             {getFacultyLevelLabels(faculty).map((label) => (
                               <span
                                 key={label}
-                                className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                                className="rounded-full bg-[var(--color-primary-bg)] px-3 py-1 text-xs font-medium text-[var(--color-primary-strong)]"
                               >
                                 {label}
                               </span>

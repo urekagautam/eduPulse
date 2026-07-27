@@ -40,7 +40,7 @@ export default function Notices() {
             className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
           >
             <div className="flex justify-between items-start mb-3">
-              <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="inline-block bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)] px-3 py-1 rounded-full text-sm font-medium">
                 {new Date(n.createdAt).toLocaleDateString()}
               </span>
             </div>
@@ -59,7 +59,7 @@ export default function Notices() {
                 {n.description.length > 160 && (
                   <button
                     onClick={() => toggle(n._id)}
-                    className="text-blue-600 mt-2"
+                    className="text-[var(--color-primary)] mt-2"
                   >
                     {expanded[n._id] ? "Show Less" : "Show More"}
                   </button>
@@ -72,11 +72,13 @@ export default function Notices() {
                     {n.caption}
                   </h3>
                 )}
-                <img
-                  src={n.imagePath}
-                  alt={n.caption || "Notice"}
-                  className="w-full h-auto rounded-lg mt-3"
-                />
+                <div className="max-w-lg overflow-hidden rounded-lg border border-gray-200 mt-3 shadow-sm">
+                  <img
+                    src={n.imagePath}
+                    alt={n.caption || "Notice"}
+                    className="w-full h-auto max-h-[350px] object-contain bg-gray-50/50"
+                  />
+                </div>
               </div>
             )}
           </div>

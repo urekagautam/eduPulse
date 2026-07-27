@@ -123,7 +123,7 @@ export default function SeatingArrangementTab({
                 onClick={() => setActivePlanId(p.id)}
                 className={`px-3 py-1.5 rounded-lg text-sm border ${
                   activePlanId === p.id
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
                     : "bg-white border-gray-300 hover:bg-gray-50"
                 }`}
               >
@@ -222,7 +222,7 @@ export default function SeatingArrangementTab({
                   <input
                     value={form.title}
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     placeholder="Enter exam title"
                   />
                 </div>
@@ -256,7 +256,7 @@ export default function SeatingArrangementTab({
                     <button
                       type="button"
                       onClick={addGroup}
-                      className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-sm text-[var(--color-primary)] hover:underline flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Add group
                     </button>
@@ -281,7 +281,7 @@ export default function SeatingArrangementTab({
                                     levels: ["1"],
                                   })
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                               >
                                 {FACULTY_CATALOG.map((f) => (
                                   <option key={f.id} value={f.code}>

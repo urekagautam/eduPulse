@@ -128,30 +128,101 @@ const deleteNotice = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, notice, "Notice deleted successfully"));
 });
 
-// Upload notice image to Cloudinary
+// Upload notice image to Cloudinary (falls back to direct Base64 only when Cloudinary is not configured)
 const uploadNoticeImage = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    throw new ApiError(400, "No file uploaded");
-  }
-
-  // Configure cloudinary from env vars if not already configured elsewhere
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-
-  // Convert buffer to data URI and upload
-  const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
-  const result = await cloudinary.uploader.upload(dataUri, {
-    folder: "notices",
-  });
-
-  res
-    .status(200)
-    .json(
-      new ApiResponse(200, { imagePath: result.secure_url }, "Image uploaded"),
+  try {
+    console.log("[uploadNoticeImage] incoming request");
+    console.log(
+      "[uploadNoticeImage] env CLOUDINARY_CLOUD_NAME:",
+      process.env.CLOUDINARY_CLOUD_NAME ? "SET" : "(not set)",
     );
+    console.log(
+      "[uploadNoticeImage] env CLOUDINARY_API_KEY:",
+      process.env.CLOUDINARY_API_KEY ? "SET" : "(not set)",
+    );
+    console.log(
+      "[uploadNoticeImage] env CLOUDINARY_API_SECRET:",
+      process.env.CLOUDINARY_API_SECRET ? "SET" : "(not set)",
+    );
+
+    if (!req.file) {
+      console.error("[uploadNoticeImage] req.file is undefined");
+      throw new ApiError(400, "No file uploaded");
+    }
+
+    console.log("[uploadNoticeImage] req.file:", {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      fieldname: req.file.fieldname,
+    });
+
+    const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+    const hasCloudinaryConfig =
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET;
+
+    if (!hasCloudinaryConfig) {
+      console.warn(
+        "[uploadNoticeImage] Cloudinary not fully configured — using Base64 fallback",
+      );
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            { imagePath: dataUri },
+            "Image uploaded to DB (Base64 fallback)",
+          ),
+        );
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "notices" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      stream.end(req.file.buffer);
+    });
+
+    console.log("[uploadNoticeImage] cloudinary result:", {
+      public_id: uploadResult.public_id,
+      secure_url: uploadResult.secure_url,
+      bytes: uploadResult.bytes,
+      format: uploadResult.format,
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { imagePath: uploadResult.secure_url },
+          "Image uploaded to Cloudinary",
+        ),
+      );
+  } catch (err) {
+    console.error(
+      "[uploadNoticeImage] error:",
+      err && err.stack ? err.stack : err,
+    );
+    if (process.env.CLOUDINARY_CLOUD_NAME) {
+      throw new ApiError(500, "Failed to upload image to Cloudinary");
+    }
+    throw err;
+  }
 });
 
 export {

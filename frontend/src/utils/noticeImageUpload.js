@@ -12,9 +12,7 @@ export async function uploadNoticeImage(file) {
   const formData = new FormData();
   formData.append("image", file);
 
-  const res = await axios.post(`${API_BASE_URL}/api/notices/upload`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const res = await axios.post(`${API_BASE_URL}/api/notices/upload`, formData);
 
   // response: { status, data: { imagePath: 'https://...' } }
   return res.data.data;

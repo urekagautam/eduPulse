@@ -69,9 +69,9 @@ export default function ImageUploadField({
           onKeyDown={(e) => e.key === "Enter" && openPicker()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 cursor-pointer transition-colors hover:border-blue-400 hover:bg-blue-50/40"
+          className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 cursor-pointer transition-colors hover:border-[var(--color-primary-border)] hover:bg-[var(--color-primary-bg)]"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-primary-bg)] text-[var(--color-primary)]">
             <Upload className="h-7 w-7" />
           </div>
           <div className="text-center">
@@ -118,7 +118,7 @@ export default function ImageUploadField({
           <button
             type="button"
             onClick={openPicker}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+            className="text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-strong)]"
           >
             Choose a different image
           </button>

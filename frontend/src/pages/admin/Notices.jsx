@@ -298,7 +298,9 @@ export default function Notices() {
   };
 
   const canPublishImageNotice =
-    noticeType === "image" && imageFile && !isPublishing;
+    noticeType === "image" &&
+    (imageFile || (editingNotice && imagePreview)) &&
+    !isPublishing;
   const canPublishTextNotice =
     noticeType === "text" && (formData.title || formData.description);
 
@@ -420,7 +422,7 @@ export default function Notices() {
                           title: e.currentTarget.innerHTML,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                   </div>
 
@@ -440,7 +442,7 @@ export default function Notices() {
                         })
                       }
                       placeholder="Enter notice description... (Text will be justified)"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
                       style={{ textAlign: "justify", minHeight: 120 }}
                     />
                   </div>
@@ -470,7 +472,7 @@ export default function Notices() {
                         setFormData({ ...formData, caption: e.target.value })
                       }
                       placeholder="Enter caption for the image..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                   </div>
                 </div>
@@ -547,7 +549,7 @@ export default function Notices() {
                   from: e.target.value,
                 })
               }
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           <span className="text-gray-500 text-sm">—</span>
@@ -561,7 +563,7 @@ export default function Notices() {
                   to: e.target.value,
                 })
               }
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           {(selectedDateRange.from || selectedDateRange.to) && (
@@ -603,7 +605,7 @@ export default function Notices() {
                 >
                   {/* Notice Header with Date and Action Buttons */}
                   <div className="flex justify-between items-start gap-4 mb-4 flex-wrap">
-                    <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="inline-block bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)] px-3 py-1 rounded-full text-sm font-medium">
                       {noticeDate.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -613,7 +615,7 @@ export default function Notices() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditNotice(notice)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-600 hover:text-[var(--color-primary)] hover:bg-[var(--color-primary-bg)] rounded-lg transition-colors"
                         title="Edit notice"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -663,7 +665,7 @@ export default function Notices() {
                               onClick={() =>
                                 toggleExpandDescription(notice._id)
                               }
-                              className="text-blue-600 hover:text-blue-700 font-medium text-sm mt-2"
+                              className="text-[var(--color-primary)] hover:text-[var(--color-primary-strong)] font-medium text-sm mt-2"
                             >
                               {expandedNotices[notice._id]
                                 ? "Show Less"
@@ -680,11 +682,13 @@ export default function Notices() {
                           {notice.caption}
                         </h3>
                       )}
-                      <img
-                        src={notice.imagePath}
-                        alt={notice.caption || "Notice image"}
-                        className="w-full h-auto rounded-lg object-cover"
-                      />
+                      <div className="max-w-lg overflow-hidden rounded-lg border border-gray-200 mt-2 shadow-sm">
+                        <img
+                          src={notice.imagePath}
+                          alt={notice.caption || "Notice image"}
+                          className="w-full h-auto max-h-[350px] object-contain bg-gray-50/50"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
