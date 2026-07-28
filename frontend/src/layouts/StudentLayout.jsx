@@ -112,7 +112,7 @@ export default function StudentLayout() {
       </div>
 
       <div className="flex-1 overflow-auto min-w-0">
-        <div className="p-8">
+        <div className="p-9">
           <Outlet />
         </div>
       </div>

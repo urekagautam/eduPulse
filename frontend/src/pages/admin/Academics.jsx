@@ -1302,8 +1302,8 @@ export default function Academics() {
                     key={t._id}
                     className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
                   >
-                    <div className="flex flex-wrap justify-between gap-4">
-                      <div className="space-y-3">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+                      <div className="min-w-0">
                         <div>
                           <h3 className="text-lg font-bold text-gray-900">
                             {t.profile.firstName} {t.profile.middleName}{" "}
@@ -1312,13 +1312,9 @@ export default function Academics() {
                           <p className="text-sm text-gray-600">
                             {t.profile.address || "Address not set"}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {t.profile.phone}
-                            {t.profile.email ? ` · ${t.profile.email}` : ""}
-                          </p>
                         </div>
 
-                        <div>
+                        <div className="mt-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
                             other assigned subjects
                           </p>
@@ -1350,84 +1346,85 @@ export default function Academics() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                        <div className="bg-gray-50 rounded-lg px-3 py-2 border">
-                          <span className="text-gray-500 text-xs">
-                            Username
-                          </span>
-                          <p className="font-mono font-semibold text-gray-800 mt-1">
+                      <div className="shrink-0 text-right text-sm text-gray-600 space-y-2 flex flex-col items-end justify-between">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-gray-800">
+                            <span className="text-xs font-normal text-gray-500 mr-1">
+                              Username:
+                            </span>
                             @{t.credentials?.username || "not set"}
                           </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg px-3 py-2 border flex items-center justify-between gap-3">
-                          <div>
-                            <span className="text-gray-500 text-xs">
-                              Password
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <span className="text-xs font-normal text-gray-500">
+                              Password:
                             </span>
-                            <p className="font-mono font-semibold text-gray-800 mt-1">
+                            <span className="font-mono font-semibold text-gray-800">
                               {visiblePasswords[t._id]
                                 ? t.credentials?.password || "Not set"
                                 : "••••••••"}
-                            </p>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setVisiblePasswords((prev) => ({
+                                  ...prev,
+                                  [t._id]: !prev[t._id],
+                                }))
+                              }
+                              className="text-gray-400 hover:text-[var(--color-primary)] transition-colors"
+                              title={
+                                visiblePasswords[t._id]
+                                  ? "Hide password"
+                                  : "Show password"
+                              }
+                            >
+                              {visiblePasswords[t._id] ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setVisiblePasswords((prev) => ({
-                                ...prev,
-                                [t._id]: !prev[t._id],
-                              }))
-                            }
-                            className="text-gray-400 hover:text-[var(--color-primary)] transition-colors"
-                            title={
-                              visiblePasswords[t._id]
-                                ? "Hide password"
-                                : "Show password"
-                            }
-                          >
-                            {visiblePasswords[t._id] ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </button>
+                          <p className="text-xs text-gray-500">
+                            {t.profile?.phone || "Phone not set"}
+                            {t.profile?.email ? ` · ${t.profile.email}` : ""}
+                          </p>
                         </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingTeacher(t);
-                            setShowAddTeacher(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteTeacher(t._id)}
-                        >
-                          Delete
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setResetTarget({
-                              type: "teacher",
-                              id: t._id,
-                              name: `${t.profile.firstName} ${t.profile.lastName}`,
-                            });
-                            setResetPasswordValue(generatePassword());
-                            setResetSuccess(false);
-                          }}
-                        >
-                          <RefreshCw className="w-3 h-3 inline mr-1 text-[var(--color-primary)]" />
-                          Reset
-                        </Button>
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingTeacher(t);
+                              setShowAddTeacher(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDeleteTeacher(t._id)}
+                          >
+                            Delete
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setResetTarget({
+                                type: "teacher",
+                                id: t._id,
+                                name: `${t.profile.firstName} ${t.profile.lastName}`,
+                              });
+                              setResetPasswordValue(generatePassword());
+                              setResetSuccess(false);
+                            }}
+                          >
+                            <RefreshCw className="w-3 h-3 inline mr-1 text-[var(--color-primary)]" />
+                            Reset
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>

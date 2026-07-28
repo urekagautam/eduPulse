@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Pencil, Search, Trash2 } from "lucide-react";
 import Button from "../../../components/Button";
 import {
   assignSubjectTeacher,
   createSubject,
+  deleteSubject,
   fetchSubjects,
+  updateSubject,
 } from "../../../services/apiSubject";
 
 const inputClass =
@@ -79,6 +81,7 @@ export default function SubjectsTab({
   const [subjectLevel, setSubjectLevel] = useState("");
   const [subjectBatch, setSubjectBatch] = useState("");
   const [subjectForm, setSubjectForm] = useState({ name: "", code: "" });
+  const [editingSubject, setEditingSubject] = useState(null);
   const [teacherSearch, setTeacherSearch] = useState({});
   const [teacherDropdownOpenId, setTeacherDropdownOpenId] = useState(null);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -162,23 +165,35 @@ export default function SubjectsTab({
       });
   };
 
-  const handleAddSubject = async () => {
+  const handleSaveSubject = async () => {
     const faculty = subjectFaculty;
     if (!faculty || !subjectLevel || !subjectForm.name.trim()) return;
 
     setSavingSubject(true);
     setNotice({ type: "", message: "" });
     try {
-      const response = await createSubject({
+      const payload = {
         name: subjectForm.name.trim(),
         code: subjectForm.code.trim(),
-        facultyId: faculty._id,
-        level: Number(subjectLevel),
-      });
+      };
+      const response = editingSubject
+        ? await updateSubject(editingSubject._id, payload)
+        : await createSubject({
+            ...payload,
+            facultyId: faculty._id,
+            level: Number(subjectLevel),
+          });
 
       if (response?.success && response.data) {
-        setSubjects((current) => [response.data, ...current]);
+        setSubjects((current) =>
+          editingSubject
+            ? current.map((subject) =>
+                subject._id === editingSubject._id ? response.data : subject,
+              )
+            : [response.data, ...current],
+        );
         setSubjectForm({ name: "", code: "" });
+        setEditingSubject(null);
       }
     } catch (error) {
       setNotice({
@@ -187,6 +202,32 @@ export default function SubjectsTab({
       });
     } finally {
       setSavingSubject(false);
+    }
+  };
+
+  const handleDeleteSubject = async (subject) => {
+    if (!window.confirm(`Delete ${subject.name}? This cannot be undone.`)) {
+      return;
+    }
+
+    setNotice({ type: "", message: "" });
+    try {
+      const response = await deleteSubject(subject._id);
+      if (response?.success) {
+        setSubjects((current) =>
+          current.filter((item) => item._id !== subject._id),
+        );
+        if (editingSubject?._id === subject._id) {
+          setEditingSubject(null);
+          setSubjectForm({ name: "", code: "" });
+        }
+        setNotice({ type: "success", message: "Subject deleted successfully." });
+      }
+    } catch (error) {
+      setNotice({
+        type: "error",
+        message: error.message || "Failed to delete subject.",
+      });
     }
   };
 
@@ -409,7 +450,23 @@ export default function SubjectsTab({
       {subjectFacultyId && subjectLevel && (
         <>
           <div className="rounded-lg border-2 border-[var(--color-primary-border)] bg-white p-6 space-y-4">
-            <h3 className="font-bold text-gray-900">Add subject</h3>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-bold text-gray-900">
+                {editingSubject ? "Edit subject" : "Add subject"}
+              </h3>
+              {editingSubject && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEditingSubject(null);
+                    setSubjectForm({ name: "", code: "" });
+                  }}
+                >
+                  Cancel edit
+                </Button>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Field label="Subject name">
                 <input
@@ -434,10 +491,14 @@ export default function SubjectsTab({
               <div className="flex items-end">
                 <Button
                   variant="primary"
-                  onClick={handleAddSubject}
+                  onClick={handleSaveSubject}
                   disabled={savingSubject}
                 >
-                  {savingSubject ? "Adding..." : "Add subject"}
+                  {savingSubject
+                    ? "Saving..."
+                    : editingSubject
+                      ? "Save changes"
+                      : "Add subject"}
                 </Button>
               </div>
             </div>
@@ -467,8 +528,8 @@ export default function SubjectsTab({
                         <p className="font-semibold text-gray-900">
                           {sub.name}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          Code:{" "}
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                          <span>Code:</span>
                           <span className="badge badge-muted">
                             {sub.code || "Not set"}
                           </span>
@@ -478,7 +539,29 @@ export default function SubjectsTab({
                           <span className="badge badge-muted">
                             {sub.levelLabel}
                           </span>
-                        </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingSubject(sub);
+                            setSubjectForm({
+                              name: sub.name || "",
+                              code: sub.code || "",
+                            });
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteSubject(sub)}
+                        >
+                          <Trash2 className="h-3 w-3" /> Delete
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -523,24 +606,46 @@ export default function SubjectsTab({
                           {sub.facultyCode} - {sub.levelLabel}
                         </p>
                       </div>
-                      {selectedSubjectBatch && sub.assignedTeacher ? (
-                        <div className="flex flex-wrap gap-2">
-                          <span className="badge badge-success">
-                            {sub.assignedTeacher.fullName}
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {selectedSubjectBatch && sub.assignedTeacher ? (
+                          <>
+                            <span className="badge badge-success">
+                              {sub.assignedTeacher.fullName}
+                            </span>
+                            <span className="badge badge-primary">
+                              Batch {selectedSubjectBatch}
+                            </span>
+                          </>
+                        ) : selectedSubjectBatch ? (
+                          <span className="badge badge-muted">
+                            No teacher assigned
                           </span>
-                          <span className="badge badge-primary">
-                            Batch {selectedSubjectBatch}
+                        ) : (
+                          <span className="badge badge-muted">
+                            Select batch to assign teacher
                           </span>
-                        </div>
-                      ) : selectedSubjectBatch ? (
-                        <span className="badge badge-muted">
-                          No teacher assigned
-                        </span>
-                      ) : (
-                        <span className="badge badge-muted">
-                          Select batch to assign teacher
-                        </span>
-                      )}
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingSubject(sub);
+                            setSubjectForm({
+                              name: sub.name || "",
+                              code: sub.code || "",
+                            });
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteSubject(sub)}
+                        >
+                          <Trash2 className="h-3 w-3" /> Delete
+                        </Button>
+                      </div>
                     </div>
 
                     {selectedSubjectBatch && (
