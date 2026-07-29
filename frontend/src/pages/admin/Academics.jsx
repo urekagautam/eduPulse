@@ -983,8 +983,8 @@ export default function Academics() {
                   Student Credentials Created
                 </h2>
                 <p className="text-sm text-gray-600">
-                  The student has been saved successfully. Please copy the
-                  temporary login credentials below:
+                  The student has been saved successfully. Temporary login
+                  credentials are shown below:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border">
@@ -1005,7 +1005,7 @@ export default function Academics() {
                     variant="primary"
                     onClick={() => setNewStudentCreds(null)}
                   >
-                    Close & Copy Details
+                    Close
                   </Button>
                 </div>
               </div>
@@ -1186,8 +1186,8 @@ export default function Academics() {
                   Teacher Credentials Created
                 </h2>
                 <p className="text-sm text-gray-600">
-                  The teacher has been saved successfully. Please copy the
-                  temporary login credentials below:
+                  The teacher has been saved successfully. Temporary login
+                  credentials are shown below:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border">
@@ -1208,7 +1208,7 @@ export default function Academics() {
                     variant="primary"
                     onClick={() => setNewTeacherCreds(null)}
                   >
-                    Close & Copy Details
+                    Close
                   </Button>
                 </div>
               </div>

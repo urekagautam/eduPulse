@@ -1,4 +1,4 @@
-import { Fragment, useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../components/Button.jsx";
 import { fetchFaculties, updateFaculty, deleteFaculty } from "../../../services/apiFaculty";
@@ -9,38 +9,13 @@ const selectClass =
   "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
-const SEMESTER_NAMES = [
-  "First",
-  "Second",
-  "Third",
-  "Fourth",
-  "Fifth",
-  "Sixth",
-  "Seventh",
-  "Eighth",
-];
-const YEAR_NAMES = ["First", "Second", "Third", "Fourth", "Fifth"];
 const MAX_SEMESTERS = 8;
 const MAX_YEARS = 5;
-
-function getLevelLabel(structureType, level) {
-  const names = structureType === "semester" ? SEMESTER_NAMES : YEAR_NAMES;
-  const name = names[level - 1] || `Level ${level}`;
-  return structureType === "semester" ? `${name} Semester` : `${name} Year`;
-}
 
 function getLevelOptions(faculty) {
   if (!faculty) return [];
   const limit = faculty.structureType === "semester" ? MAX_SEMESTERS : MAX_YEARS;
   return Array.from({ length: limit }, (_, i) => i + 1);
-}
-
-function getFacultyLevelLabels(faculty) {
-  if (!faculty) return [];
-  const limit = faculty.structureType === "semester" ? MAX_SEMESTERS : MAX_YEARS;
-  return Array.from({ length: limit }, (_, i) =>
-    getLevelLabel(faculty.structureType, i + 1),
-  );
 }
 
 export default function FacultyManagement() {
@@ -200,8 +175,7 @@ export default function FacultyManagement() {
                 {faculties.map((faculty) => {
                   const isEditing = editingFacultyId === faculty._id;
                   return (
-                    <Fragment key={faculty._id}>
-                      <tr>
+                      <tr key={faculty._id}>
                         <td className="px-4 py-3">
                           {isEditing ? (
                             <input
@@ -330,21 +304,6 @@ export default function FacultyManagement() {
                           )}
                         </td>
                       </tr>
-                      <tr className="bg-slate-50">
-                        <td colSpan="5" className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            {getFacultyLevelLabels(faculty).map((label) => (
-                              <span
-                                key={label}
-                                className="rounded-full bg-[var(--color-primary-bg)] px-3 py-1 text-xs font-medium text-[var(--color-primary-strong)]"
-                              >
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    </Fragment>
                   );
                 })}
               </tbody>
