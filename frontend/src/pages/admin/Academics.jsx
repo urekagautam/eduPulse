@@ -569,7 +569,7 @@ export default function Academics() {
       setShowAddStudent(false);
     } catch (error) {
       console.error("Failed to save student:", error);
-      alert(error.message || "Failed to save student");
+      throw error;
     }
   };
 
@@ -617,7 +617,7 @@ export default function Academics() {
       setShowAddTeacher(false);
     } catch (error) {
       console.error("Failed to save teacher:", error);
-      alert(error.message || "Failed to save teacher");
+      throw error;
     }
   };
 
@@ -973,6 +973,8 @@ export default function Academics() {
             faculty={filterFaculty}
             currentLevel={filterLevel}
             student={editingStudent}
+            students={activeStudentsForAssignments}
+            teachers={teachers}
           />
 
           {newStudentCreds && (
@@ -1176,6 +1178,8 @@ export default function Academics() {
             }}
             onSave={handleSaveTeacher}
             teacher={editingTeacher}
+            students={activeStudentsForAssignments}
+            teachers={teachers}
           />
 
           {newTeacherCreds && (

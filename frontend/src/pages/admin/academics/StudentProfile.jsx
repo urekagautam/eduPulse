@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { X, KeyRound } from "lucide-react";
 import Button from "../../../components/Button";
+import {
+  validateEmail,
+  validateName,
+  validateNepalMobile,
+} from "../../../validations/personValidation";
 
 const inputClass =
   "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const selectClass =
   "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
+const errorClass = "mt-1 text-xs font-medium text-red-600";
 
 const emptyForm = () => ({
   firstName: "",
@@ -38,7 +44,7 @@ function generateUsername(firstName, lastName, studentId) {
   return base || studentId?.toLowerCase() || `user${Date.now()}`;
 }
 
-const Field = ({ label, children, optional }) => (
+const Field = ({ label, children, optional, error }) => (
   <div>
     <label className={labelClass}>
       {label}
@@ -47,6 +53,7 @@ const Field = ({ label, children, optional }) => (
       )}
     </label>
     {children}
+    {error && <p className={errorClass}>{error}</p>}
   </div>
 );
 
@@ -57,10 +64,13 @@ export default function StudentProfile({
   faculty,
   currentLevel,
   student = null,
+  students = [],
+  teachers = [],
 }) {
   const [form, setForm] = useState(emptyForm());
   const [newStudentCreds, setNewStudentCreds] = useState(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -91,26 +101,129 @@ export default function StudentProfile({
       setNewStudentCreds(null);
     }
     setError("");
+    setFieldErrors({});
   }, [student, isOpen]);
 
   if (!isOpen) return null;
 
-  const getLevelLabel = (struct, lvl) => {
-    const SEMESTER_NAMES = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth"];
-    const YEAR_NAMES = ["First", "Second", "Third", "Fourth", "Fifth"];
-    const names = struct === "semester" ? SEMESTER_NAMES : YEAR_NAMES;
-    const name = names[lvl - 1] || `Level ${lvl}`;
-    return struct === "semester" ? `${name} Semester` : `${name} Year`;
+  const getInputClass = (fieldName, baseClass = inputClass) =>
+    `${baseClass} ${fieldErrors[fieldName] ? "border-red-400 focus:ring-red-400" : ""}`;
+
+  const updateField = (fieldName, value) => {
+    setForm((current) => ({ ...current, [fieldName]: value }));
+    if (fieldErrors[fieldName]) {
+      setFieldErrors((current) => ({ ...current, [fieldName]: "" }));
+    }
   };
 
-  const levelLabel = faculty ? getLevelLabel(faculty.structureType, Number(currentLevel)) : "";
+  const getStudentFieldErrors = () => ({
+    admittedBatch: !String(form.admittedBatch || "").trim()
+      ? "Admitted batch is required."
+      : "",
+    studentId: !String(form.studentId || "").trim()
+      ? "Student ID is required."
+      : "",
+    firstName: validateName(form.firstName, "First name"),
+    middleName: validateName(form.middleName, "Middle name", {
+      required: false,
+    }),
+    lastName: validateName(form.lastName, "Last name"),
+    mobile: validateNepalMobile(form.mobile, "Mobile number"),
+    email: validateEmail(form.email),
+    gender: !form.gender ? "Gender is required." : "",
+    guardianName: validateName(form.guardianName, "Guardian name", {
+      required: false,
+    }),
+    guardianMobile: validateNepalMobile(form.guardianMobile, "Guardian mobile", {
+      required: false,
+    }),
+    fatherName: validateName(form.fatherName, "Father's name", {
+      required: false,
+    }),
+    fatherMobile: validateNepalMobile(form.fatherMobile, "Father's mobile", {
+      required: false,
+    }),
+    motherName: validateName(form.motherName, "Mother's name", {
+      required: false,
+    }),
+    motherMobile: validateNepalMobile(form.motherMobile, "Mother's mobile", {
+      required: false,
+    }),
+  });
+
+  const getDuplicateFieldErrors = () => {
+    const studentId = String(form.studentId || "").trim().toLowerCase();
+    const email = String(form.email || "").trim().toLowerCase();
+    const mobile = String(form.mobile || "").trim();
+    const currentStudentId = student?._id;
+
+    const duplicateStudentId = students.some(
+      (item) =>
+        item._id !== currentStudentId &&
+        String(item.studentId || "").trim().toLowerCase() === studentId,
+    );
+    const duplicateStudentEmail = students.some(
+      (item) =>
+        item._id !== currentStudentId &&
+        String(item.profile?.email || "").trim().toLowerCase() === email,
+    );
+    const duplicateTeacherEmail = teachers.some(
+      (item) =>
+        String(item.profile?.email || "").trim().toLowerCase() === email,
+    );
+    const duplicateStudentPhone = students.some(
+      (item) =>
+        item._id !== currentStudentId &&
+        String(item.profile?.mobile || "").trim() === mobile,
+    );
+    const duplicateTeacherPhone = teachers.some(
+      (item) => String(item.profile?.phone || "").trim() === mobile,
+    );
+
+    return {
+      studentId: studentId && duplicateStudentId ? "Student ID already exists." : "",
+      email: email && (duplicateStudentEmail || duplicateTeacherEmail)
+        ? "Email already exists."
+        : "",
+      mobile: mobile && (duplicateStudentPhone || duplicateTeacherPhone)
+        ? "Phone number already exists."
+        : "",
+    };
+  };
+
+  const applyBackendError = (message) => {
+    if (/email already exists/i.test(message)) {
+      setFieldErrors({ email: "Email already exists." });
+      return;
+    }
+    if (/phone number already exists/i.test(message)) {
+      setFieldErrors({ mobile: "Phone number already exists." });
+      return;
+    }
+    if (/mobile number|phone number/i.test(message)) {
+      setFieldErrors({ mobile: "Invalid phone number." });
+      return;
+    }
+    if (/student id already exists/i.test(message)) {
+      setFieldErrors({ studentId: "Student ID already exists." });
+      return;
+    }
+    setError(message);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!form.firstName || !form.lastName || !form.studentId || !form.admittedBatch || !form.mobile || !form.email || !form.gender) {
-      setError("Please fill in all required fields.");
+    const validationErrors = getStudentFieldErrors();
+    const duplicateErrors = getDuplicateFieldErrors();
+    const nextFieldErrors = {
+      ...validationErrors,
+      studentId: validationErrors.studentId || duplicateErrors.studentId,
+      email: validationErrors.email || duplicateErrors.email,
+      mobile: validationErrors.mobile || duplicateErrors.mobile,
+    };
+    setFieldErrors(nextFieldErrors);
+    if (Object.values(nextFieldErrors).some(Boolean)) {
       return;
     }
 
@@ -158,7 +271,7 @@ export default function StudentProfile({
       onClose();
     } catch (err) {
       console.error(err);
-      setError(err?.message || "Failed to save student.");
+      applyBackendError(err?.message || "Failed to save student.");
     } finally {
       setSaving(false);
     }
@@ -186,42 +299,32 @@ export default function StudentProfile({
           </div>
         )}
 
-        {/* Selected Context Informative Panel */}
-        <div className="bg-[var(--color-primary-bg)] border-l-4 border-[var(--color-primary-border)] p-4 mb-6 rounded-r-lg text-sm text-[var(--color-primary-strong)]">
-          <span className="font-semibold block mb-1">Enrolling Target Context (Auto-set from Filter):</span>
-          <p>
-            Program: <strong className="font-semibold">{faculty?.name} ({faculty?.code})</strong> · 
-            Class: <strong className="font-semibold">{levelLabel}</strong>
-          </p>
-        </div>
 
-        <form onSubmit={handleSave} className="space-y-8">
+        <form onSubmit={handleSave} className="space-y-8" noValidate>
           {/* Section 1: Admission & Core Identifiers */}
           <div className="space-y-4">
             <h3 className="font-bold text-gray-800 border-b pb-2 text-lg">
               Admission Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Admitted Batch">
+              <Field label="Admitted Batch" error={fieldErrors.admittedBatch}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("admittedBatch")}
                   value={form.admittedBatch}
                   onChange={(e) =>
-                    setForm({ ...form, admittedBatch: e.target.value })
+                    updateField("admittedBatch", e.target.value)
                   }
                   placeholder="e.g. 2081"
-                  required
                 />
               </Field>
-              <Field label="Student ID">
+              <Field label="Student ID" error={fieldErrors.studentId}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("studentId")}
                   value={form.studentId}
                   onChange={(e) =>
-                    setForm({ ...form, studentId: e.target.value })
+                    updateField("studentId", e.target.value)
                   }
                   placeholder="BCA-2081-001"
-                  required
                 />
               </Field>
             </div>
@@ -233,54 +336,49 @@ export default function StudentProfile({
               Personal Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label="First Name">
+              <Field label="First Name" error={fieldErrors.firstName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("firstName")}
                   value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  required
+                  onChange={(e) => updateField("firstName", e.target.value)}
                 />
               </Field>
-              <Field label="Middle Name" optional>
+              <Field label="Middle Name" optional error={fieldErrors.middleName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("middleName")}
                   value={form.middleName}
-                  onChange={(e) => setForm({ ...form, middleName: e.target.value })}
+                  onChange={(e) => updateField("middleName", e.target.value)}
                 />
               </Field>
-              <Field label="Last Name">
+              <Field label="Last Name" error={fieldErrors.lastName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("lastName")}
                   value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  required
+                  onChange={(e) => updateField("lastName", e.target.value)}
                 />
               </Field>
-              <Field label="Mobile No.">
+              <Field label="Mobile No." error={fieldErrors.mobile}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("mobile")}
                   value={form.mobile}
-                  onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                  onChange={(e) => updateField("mobile", e.target.value)}
                   placeholder="e.g. 98XXXXXXXX"
-                  required
                 />
               </Field>
-              <Field label="Email">
+              <Field label="Email" error={fieldErrors.email}>
                 <input
                   type="email"
-                  className={inputClass}
+                  className={getInputClass("email")}
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => updateField("email", e.target.value)}
                   placeholder="e.g. email@domain.com"
-                  required
                 />
               </Field>
-              <Field label="Gender">
+              <Field label="Gender" error={fieldErrors.gender}>
                 <select
-                  className={selectClass}
+                  className={getInputClass("gender", selectClass)}
                   value={form.gender}
-                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                  required
+                  onChange={(e) => updateField("gender", e.target.value)}
                 >
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
@@ -292,7 +390,7 @@ export default function StudentProfile({
                 <input
                   className={inputClass}
                   value={form.bloodGroup}
-                  onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })}
+                  onChange={(e) => updateField("bloodGroup", e.target.value)}
                   placeholder="e.g. A+, O-"
                 />
               </Field>
@@ -300,21 +398,21 @@ export default function StudentProfile({
                 <input
                   className={inputClass}
                   value={form.citizenshipNo}
-                  onChange={(e) => setForm({ ...form, citizenshipNo: e.target.value })}
+                  onChange={(e) => updateField("citizenshipNo", e.target.value)}
                 />
               </Field>
               <Field label="University Reg. No." optional>
                 <input
                   className={inputClass}
                   value={form.universityRegNo}
-                  onChange={(e) => setForm({ ...form, universityRegNo: e.target.value })}
+                  onChange={(e) => updateField("universityRegNo", e.target.value)}
                 />
               </Field>
               <Field label="University Symbol No." optional>
                 <input
                   className={inputClass}
                   value={form.universitySymbolNo}
-                  onChange={(e) => setForm({ ...form, universitySymbolNo: e.target.value })}
+                  onChange={(e) => updateField("universitySymbolNo", e.target.value)}
                 />
               </Field>
             </div>
@@ -326,46 +424,46 @@ export default function StudentProfile({
               Guardian & Parent Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Guardian Name" optional>
+              <Field label="Guardian Name" optional error={fieldErrors.guardianName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("guardianName")}
                   value={form.guardianName}
-                  onChange={(e) => setForm({ ...form, guardianName: e.target.value })}
+                  onChange={(e) => updateField("guardianName", e.target.value)}
                 />
               </Field>
-              <Field label="Guardian Mobile" optional>
+              <Field label="Guardian Mobile" optional error={fieldErrors.guardianMobile}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("guardianMobile")}
                   value={form.guardianMobile}
-                  onChange={(e) => setForm({ ...form, guardianMobile: e.target.value })}
+                  onChange={(e) => updateField("guardianMobile", e.target.value)}
                 />
               </Field>
-              <Field label="Father's Name" optional>
+              <Field label="Father's Name" optional error={fieldErrors.fatherName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("fatherName")}
                   value={form.fatherName}
-                  onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+                  onChange={(e) => updateField("fatherName", e.target.value)}
                 />
               </Field>
-              <Field label="Father's Mobile" optional>
+              <Field label="Father's Mobile" optional error={fieldErrors.fatherMobile}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("fatherMobile")}
                   value={form.fatherMobile}
-                  onChange={(e) => setForm({ ...form, fatherMobile: e.target.value })}
+                  onChange={(e) => updateField("fatherMobile", e.target.value)}
                 />
               </Field>
-              <Field label="Mother's Name" optional>
+              <Field label="Mother's Name" optional error={fieldErrors.motherName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("motherName")}
                   value={form.motherName}
-                  onChange={(e) => setForm({ ...form, motherName: e.target.value })}
+                  onChange={(e) => updateField("motherName", e.target.value)}
                 />
               </Field>
-              <Field label="Mother's Mobile" optional>
+              <Field label="Mother's Mobile" optional error={fieldErrors.motherMobile}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("motherMobile")}
                   value={form.motherMobile}
-                  onChange={(e) => setForm({ ...form, motherMobile: e.target.value })}
+                  onChange={(e) => updateField("motherMobile", e.target.value)}
                 />
               </Field>
             </div>

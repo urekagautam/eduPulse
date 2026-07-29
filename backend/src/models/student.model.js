@@ -56,6 +56,7 @@ const studentSchema = new Schema(
     mobile_no: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
 

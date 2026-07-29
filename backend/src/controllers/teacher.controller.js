@@ -1,8 +1,17 @@
 import bcrypt from "bcryptjs";
 import { Teacher } from "../models/teacher.model.js";
+import { Student } from "../models/student.model.js";
 import { ClassOffering } from "../models/classOffering.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {
+  buildUsernameBase,
+  firstValidationError,
+  getUniqueUsername,
+  validateEmail,
+  validateName,
+  validateNepalMobile,
+} from "../validations/person.validation.js";
 
 const normalizeTeacher = (teacher, assignedSubjects = []) => ({
   _id: teacher._id,
@@ -110,6 +119,15 @@ const getActiveAssignedSubjectsByTeacher = async (teacherIds) => {
   return map;
 };
 
+const validateTeacherFields = (parsed) =>
+  firstValidationError([
+    validateName(parsed.first_name, "First name"),
+    validateName(parsed.middle_name, "Middle name", { required: false }),
+    validateName(parsed.last_name, "Last name"),
+    validateEmail(parsed.email),
+    validateNepalMobile(parsed.mobile_no, "Phone number"),
+  ]);
+
 export const getTeachers = async (req, res, next) => {
   try {
     const teachers = await Teacher.find({ isActive: true }).sort({
@@ -148,19 +166,33 @@ export const createTeacher = async (req, res, next) => {
       throw new ApiError(400, "Required fields are missing");
     }
 
+    const validationError = validateTeacherFields(parsed);
+    if (validationError) {
+      throw new ApiError(400, validationError);
+    }
+
     const email = parsed.email.toLowerCase().trim();
-    const existingEmail = await Teacher.findOne({ email });
-    if (existingEmail) throw new ApiError(409, "Email already exists");
+    const mobile = parsed.mobile_no.trim();
+    const [existingTeacherEmail, existingStudentEmail] = await Promise.all([
+      Teacher.exists({ email }),
+      Student.exists({ email }),
+    ]);
+    if (existingTeacherEmail || existingStudentEmail) {
+      throw new ApiError(409, "Email already exists");
+    }
 
-    const username = (
-      parsed.username ||
-      `${parsed.first_name}.${parsed.last_name}`
-    )
-      .trim()
-      .toLowerCase();
+    const [existingTeacherMobile, existingStudentMobile] = await Promise.all([
+      Teacher.exists({ mobile_no: mobile }),
+      Student.exists({ mobile_no: mobile }),
+    ]);
+    if (existingTeacherMobile || existingStudentMobile) {
+      throw new ApiError(409, "Phone number already exists");
+    }
 
-    const existingUsername = await Teacher.findOne({ username });
-    if (existingUsername) throw new ApiError(409, "Username already exists");
+    const username = await getUniqueUsername(
+      Teacher,
+      parsed.username || buildUsernameBase(parsed.first_name, parsed.last_name, "teacher"),
+    );
 
     const tempPassword =
       parsed.password || `Tmp@${Math.random().toString(36).slice(2, 10)}`;
@@ -169,6 +201,7 @@ export const createTeacher = async (req, res, next) => {
     const teacher = await Teacher.create({
       ...parsed,
       email,
+      mobile_no: mobile,
       username,
       password: hashedPassword,
       plain_password: tempPassword,
@@ -193,18 +226,46 @@ export const updateTeacher = async (req, res, next) => {
 
     const parsed = parseTeacherBody(req.body);
 
-    if (parsed.email && parsed.email.toLowerCase() !== teacher.email) {
-      const existing = await Teacher.findOne({
-        email: parsed.email.toLowerCase(),
-      });
-      if (existing) throw new ApiError(409, "Email already exists");
-      teacher.email = parsed.email.toLowerCase().trim();
+    const validationError = firstValidationError([
+      parsed.first_name ? validateName(parsed.first_name, "First name") : "",
+      parsed.middle_name !== undefined
+        ? validateName(parsed.middle_name, "Middle name", { required: false })
+        : "",
+      parsed.last_name ? validateName(parsed.last_name, "Last name") : "",
+      parsed.email ? validateEmail(parsed.email) : "",
+      parsed.mobile_no ? validateNepalMobile(parsed.mobile_no, "Phone number") : "",
+    ]);
+    if (validationError) {
+      throw new ApiError(400, validationError);
+    }
+
+    if (parsed.email && parsed.email.toLowerCase().trim() !== teacher.email) {
+      const email = parsed.email.toLowerCase().trim();
+      const [existingTeacher, existingStudent] = await Promise.all([
+        Teacher.exists({ _id: { $ne: teacher._id }, email }),
+        Student.exists({ email }),
+      ]);
+      if (existingTeacher || existingStudent) {
+        throw new ApiError(409, "Email already exists");
+      }
+      teacher.email = email;
+    }
+
+    if (parsed.mobile_no && parsed.mobile_no.trim() !== teacher.mobile_no) {
+      const mobile = parsed.mobile_no.trim();
+      const [existingTeacher, existingStudent] = await Promise.all([
+        Teacher.exists({ _id: { $ne: teacher._id }, mobile_no: mobile }),
+        Student.exists({ mobile_no: mobile }),
+      ]);
+      if (existingTeacher || existingStudent) {
+        throw new ApiError(409, "Phone number already exists");
+      }
+      teacher.mobile_no = mobile;
     }
 
     if (parsed.first_name) teacher.first_name = parsed.first_name;
     if (parsed.middle_name !== undefined) teacher.middle_name = parsed.middle_name;
     if (parsed.last_name) teacher.last_name = parsed.last_name;
-    if (parsed.mobile_no) teacher.mobile_no = parsed.mobile_no;
     if (parsed.address !== undefined) teacher.address = parsed.address;
 
     if (parsed.password) {
