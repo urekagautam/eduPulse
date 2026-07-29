@@ -12,6 +12,12 @@ import { Quiz } from "../models/quiz.model.js";
 import { QuizSubmission } from "../models/quizSubmission.model.js";
 import { Student } from "../models/student.model.js";
 import { Subject } from "../models/subject.model.js";
+import {
+  DEFAULT_K,
+  DEFAULT_MIN_ROWS,
+  predictWithKnn,
+  trainKnnClassifier,
+} from "./performanceKnn.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -552,6 +558,13 @@ export const getStudentPerformancePrediction = async (studentId) => {
   const modelPrediction = predictWithModel(model, features);
   const fallback = heuristicPrediction(features);
   const prediction = modelPrediction || fallback;
+  const knnRows =
+    dataset.length >= DEFAULT_MIN_ROWS ? dataset : await buildLabelledPerformanceDataset();
+  const knnModel = trainKnnClassifier(knnRows, FEATURE_NAMES, {
+    k: DEFAULT_K,
+    minRows: DEFAULT_MIN_ROWS,
+  });
+  const knnPrediction = predictWithKnn(knnModel, features);
 
   return {
     available: prediction.predictedPercent != null,
@@ -562,6 +575,17 @@ export const getStudentPerformancePrediction = async (studentId) => {
     riskCategory: prediction.riskCategory,
     features,
     metadata,
+    knnClassification: {
+      available: Boolean(knnPrediction),
+      algorithm: "K-Nearest Neighbors",
+      trainedSampleCount: knnModel?.sampleCount || knnRows.length,
+      k: DEFAULT_K,
+      riskCategory: knnPrediction?.riskCategory || null,
+      confidencePercent: knnPrediction?.confidencePercent ?? null,
+      note: knnPrediction
+        ? "KNN classifies the risk category by comparing this student with the nearest labelled academic records."
+        : `Only ${knnRows.length} labelled rows are available. KNN needs at least ${DEFAULT_MIN_ROWS}.`,
+    },
     note: modelPrediction
       ? "Prediction is generated from labelled rows built from existing semester records."
       : `Only ${dataset.length} labelled rows are available. Random Forest needs at least ${MIN_RANDOM_FOREST_ROWS}, so a weighted fallback was used.`,

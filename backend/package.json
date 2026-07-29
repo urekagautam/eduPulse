@@ -8,6 +8,7 @@
     "demo:seed-ml": "node -r dotenv/config scripts/seedMlDemoData.js",
     "ml:export": "node -r dotenv/config scripts/exportPerformanceDataset.js",
     "ml:evaluate": "node -r dotenv/config scripts/evaluatePerformanceModel.js",
+    "ml:evaluate-knn": "node -r dotenv/config scripts/evaluateKnnModel.js",
     "ml:train": "node -r dotenv/config scripts/trainPerformanceModel.js"
   },
   "repository": {

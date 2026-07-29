@@ -135,6 +135,12 @@ export default function StudentPerformanceDetail() {
 
   const { student, attendance, examAttendance, quizzes } = detail;
   const prediction = detail.prediction;
+  const knnCategories = [
+    { label: "At Risk", color: "red" },
+    { label: "Average", color: "yellow" },
+    { label: "Good", color: "blue" },
+    { label: "Excellent", color: "green" },
+  ];
   const selectedExam = detail.exams.find(
     (exam) => exam.exam.id === selectedExamId,
   );
@@ -253,13 +259,6 @@ export default function StudentPerformanceDetail() {
               <span className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-2xl font-bold text-gray-900">
                 {percentText(prediction.predictedFinalPercent)}
               </span>
-              <span
-                className={`rounded-full border px-4 py-2 text-sm font-bold ${riskClass(
-                  prediction.riskCategory?.color,
-                )}`}
-              >
-                {prediction.riskCategory?.label || "Unavailable"}
-              </span>
             </div>
           ) : (
             <span className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600">
@@ -294,6 +293,53 @@ export default function StudentPerformanceDetail() {
               {prediction.algorithm} · {prediction.trainedSampleCount || 0} labelled rows ·{" "}
               {prediction.note}
             </p>
+            {prediction.knnClassification?.available && (
+              <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      K-Nearest Neighbors Classification
+                    </p>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Risk category classified from nearest labelled student records.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {knnCategories.map((category) => {
+                        const isActive =
+                          prediction.knnClassification.riskCategory?.label ===
+                          category.label;
+                        return (
+                          <div
+                            key={category.label}
+                            className={`min-w-24 rounded-lg border px-3 py-2 text-center text-sm font-bold ${
+                              isActive
+                                ? `${riskClass(category.color)} ring-2 ring-green-500 ring-offset-1`
+                                : "border-gray-200 bg-gray-50 text-gray-400"
+                            }`}
+                          >
+                            {category.label}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <span className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700">
+                      {percentText(
+                        prediction.knnClassification.confidencePercent,
+                      )}{" "}
+                      confidence
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-gray-500">
+                  {prediction.knnClassification.algorithm} - K ={" "}
+                  {prediction.knnClassification.k} -{" "}
+                  {prediction.knnClassification.trainedSampleCount || 0} labelled rows -{" "}
+                  {prediction.knnClassification.note}
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <div className={emptyClass}>
