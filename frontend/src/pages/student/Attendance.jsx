@@ -28,7 +28,7 @@ const formatDate = (value) => {
 
 function SummaryCard({ icon: Icon, label, value, detail, tone = "blue" }) {
   const tones = {
-    blue: "bg-blue-50 text-blue-700",
+    blue: "bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]",
     green: "bg-green-50 text-green-700",
     red: "bg-red-50 text-red-700",
   };
@@ -144,7 +144,7 @@ export default function Attendance() {
           </p>
         </div>
         {attendance?.classInfo && (
-          <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+          <div className="rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-strong)]">
             {attendance.classInfo.facultyCode} · {attendance.classInfo.levelLabel} · Batch{" "}
             {attendance.classInfo.batch}
           </div>
@@ -159,7 +159,7 @@ export default function Attendance() {
 
       {loading ? (
         <div className={cardClass}>
-          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
           <p className="text-center text-gray-600">Loading attendance...</p>
         </div>
       ) : (
@@ -201,7 +201,7 @@ export default function Attendance() {
               onClick={() => setActiveTab("class")}
               className={`rounded-md px-4 py-2 text-sm font-semibold ${
                 activeTab === "class"
-                  ? "bg-white text-blue-700 shadow-sm"
+                  ? "bg-white text-[var(--color-primary-strong)] shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -212,7 +212,7 @@ export default function Attendance() {
               onClick={() => setActiveTab("exam")}
               className={`rounded-md px-4 py-2 text-sm font-semibold ${
                 activeTab === "exam"
-                  ? "bg-white text-blue-700 shadow-sm"
+                  ? "bg-white text-[var(--color-primary-strong)] shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -284,12 +284,12 @@ export default function Attendance() {
                       type="date"
                       value={classDateFilter}
                       onChange={(event) => setClassDateFilter(event.target.value)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                     <select
                       value={classStatusFilter}
                       onChange={(event) => setClassStatusFilter(event.target.value)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     >
                       <option value="">All status</option>
                       <option value="present">Present only</option>
@@ -362,7 +362,7 @@ export default function Attendance() {
                   <select
                     value={examFilter}
                     onChange={(event) => setExamFilter(event.target.value)}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option value="">All exams</option>
                     {examTitles.map((title) => (
@@ -377,7 +377,7 @@ export default function Attendance() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder="Search subject or status"
-                      className="rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="rounded-lg border border-gray-300 py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                   </div>
                 </div>

@@ -31,7 +31,7 @@ function StatCard({ icon: Icon, label, value, detail }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+        <div className="rounded-lg bg-[var(--color-primary-bg)] p-2 text-[var(--color-primary)]">
           <Icon className="h-5 w-5" />
         </div>
         <div>
@@ -61,7 +61,7 @@ function statusClass(status) {
 function riskClass(color) {
   if (color === "red") return "border-red-100 bg-red-50 text-red-700";
   if (color === "yellow") return "border-yellow-100 bg-yellow-50 text-yellow-800";
-  if (color === "blue") return "border-blue-100 bg-blue-50 text-blue-700";
+  if (color === "blue") return "border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]";
   if (color === "green") return "border-green-100 bg-green-50 text-green-700";
   return "border-gray-100 bg-gray-50 text-gray-600";
 }
@@ -110,7 +110,7 @@ export default function StudentPerformanceDetail() {
   if (loading) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-gray-600">
-        <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+        <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
         Loading student details...
       </div>
     );
@@ -122,7 +122,7 @@ export default function StudentPerformanceDetail() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+          className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-strong)]"
         >
           <ArrowLeft className="h-5 w-5" /> Back
         </button>
@@ -145,7 +145,7 @@ export default function StudentPerformanceDetail() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+          className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-strong)]"
         >
           <ArrowLeft className="h-5 w-5" /> Back to students
         </button>
@@ -162,7 +162,7 @@ export default function StudentPerformanceDetail() {
       <section className={cardClass}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
               <User className="h-7 w-7" />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function StudentPerformanceDetail() {
                 {student.studentId} · @{student.username}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                <span className="rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-3 py-1 text-xs font-semibold text-[var(--color-primary-strong)]">
                   {student.admission.facultyCode} ·{" "}
                   {student.enrollment.currentLevelLabel}
                 </span>
@@ -235,7 +235,7 @@ export default function StudentPerformanceDetail() {
       <section className={cardClass}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+            <div className="rounded-lg bg-[var(--color-primary-bg)] p-2 text-[var(--color-primary)]">
               <TrendingUp className="h-5 w-5" />
             </div>
             <div>
@@ -305,14 +305,14 @@ export default function StudentPerformanceDetail() {
       <section className={cardClass}>
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <BookOpen className="h-5 w-5 text-blue-600" />
+            <BookOpen className="h-5 w-5 text-[var(--color-primary)]" />
             <h2 className="text-xl font-bold text-gray-900">Exam Marks</h2>
           </div>
           {detail.exams.length > 0 && (
             <select
               value={selectedExamId}
               onChange={(event) => setSelectedExamId(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600 md:w-72"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] md:w-72"
             >
               {detail.exams.map((exam) => (
                 <option key={exam.exam.id} value={exam.exam.id}>
@@ -386,7 +386,7 @@ export default function StudentPerformanceDetail() {
       <div className="grid gap-6 xl:grid-cols-2">
         <section className={cardClass}>
           <div className="mb-5 flex items-center gap-3">
-            <CalendarCheck className="h-5 w-5 text-blue-600" />
+            <CalendarCheck className="h-5 w-5 text-[var(--color-primary)]" />
             <h2 className="text-xl font-bold text-gray-900">Class Attendance</h2>
           </div>
           {!attendance.bySubject.length ? (
@@ -419,7 +419,7 @@ export default function StudentPerformanceDetail() {
 
         <section className={cardClass}>
           <div className="mb-5 flex items-center gap-3">
-            <ClipboardList className="h-5 w-5 text-blue-600" />
+            <ClipboardList className="h-5 w-5 text-[var(--color-primary)]" />
             <h2 className="text-xl font-bold text-gray-900">Exam Attendance</h2>
           </div>
           {!examAttendance.records.length ? (
@@ -456,7 +456,7 @@ export default function StudentPerformanceDetail() {
 
       <section className={cardClass}>
         <div className="mb-5 flex items-center gap-3">
-          <FileQuestion className="h-5 w-5 text-blue-600" />
+          <FileQuestion className="h-5 w-5 text-[var(--color-primary)]" />
           <h2 className="text-xl font-bold text-gray-900">Quizzes</h2>
         </div>
         {!quizzes.records.length ? (

@@ -63,7 +63,7 @@ export default function ClassLayoutsTab({ layouts, onSaveLayouts }) {
                       setEditingLayout(layout);
                       setShowWizard(true);
                     }}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-bg)] rounded-lg"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>

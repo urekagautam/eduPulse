@@ -3,9 +3,9 @@ import { X, KeyRound } from "lucide-react";
 import Button from "../../../components/Button";
 
 const inputClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const emptyForm = () => ({
@@ -187,7 +187,7 @@ export default function StudentProfile({
         )}
 
         {/* Selected Context Informative Panel */}
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg text-sm text-blue-900">
+        <div className="bg-[var(--color-primary-bg)] border-l-4 border-[var(--color-primary-border)] p-4 mb-6 rounded-r-lg text-sm text-[var(--color-primary-strong)]">
           <span className="font-semibold block mb-1">Enrolling Target Context (Auto-set from Filter):</span>
           <p>
             Program: <strong className="font-semibold">{faculty?.name} ({faculty?.code})</strong> · 

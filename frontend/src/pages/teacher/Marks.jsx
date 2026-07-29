@@ -10,7 +10,7 @@ import {
 } from "../../services/apiTeacherMarks";
 
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 export default function Marks() {
@@ -359,7 +359,7 @@ export default function Marks() {
         )}
 
         {currentAssignment && (
-          <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <div className="mt-4 rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-3 text-sm text-[var(--color-primary-strong)]">
             {currentAssignment.facultyCode} - {currentAssignment.levelLabel} -{" "}
             {currentAssignment.subjectName} - Batch {currentAssignment.batch}
           </div>

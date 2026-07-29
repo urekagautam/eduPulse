@@ -1,5 +1,4 @@
-﻿import { useState, useMemo, useEffect, useRef } from "react";
-// import { useState, useMemo, useEffect, useRef } from "react";
+﻿import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   X,
@@ -15,12 +14,7 @@ import {
   Upload,
 } from "lucide-react";
 import Button from "../../components/Button";
-import {
-  createFaculty,
-  fetchFaculties,
-  updateFaculty,
-  deleteFaculty,
-} from "../../services/apiFaculty";
+import { createFaculty, fetchFaculties } from "../../services/apiFaculty";
 import StudentProfile from "./academics/StudentProfile";
 import BatchUpgradeTab from "./academics/BatchUpgradeTab";
 import SubjectsTab from "./academics/SubjectsTab";
@@ -40,9 +34,9 @@ import {
 } from "../../services/apiAddTeacher";
 
 const inputClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const SEMESTER_NAMES = [
@@ -68,7 +62,8 @@ function getLevelLabel(structureType, level) {
 
 function getLevelOptions(faculty) {
   if (!faculty) return [];
-  const limit = faculty.structureType === "semester" ? MAX_SEMESTERS : MAX_YEARS;
+  const limit =
+    faculty.structureType === "semester" ? MAX_SEMESTERS : MAX_YEARS;
   const max = Math.min(Math.max(Number(faculty.maxLevel) || 1, 1), limit);
   return Array.from({ length: max }, (_, i) => {
     const level = i + 1;
@@ -76,64 +71,21 @@ function getLevelOptions(faculty) {
   });
 }
 
-function getFacultyLevelLabels(faculty) {
-  if (!faculty) return [];
-  const limit = faculty.structureType === "semester" ? MAX_SEMESTERS : MAX_YEARS;
-  const max = Math.min(Math.max(Number(faculty.maxLevel) || 1, 1), limit);
-  return Array.from({ length: max }, (_, i) =>
-    getLevelLabel(faculty.structureType, i + 1),
-  );
-}
-
 function generatePassword() {
   return `Tmp@${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function generateUsername(firstName, lastName, studentId) {
-  const base = `${firstName}.${lastName}`.toLowerCase().replace(/\s+/g, "");
-  return base || studentId?.toLowerCase() || `user${Date.now()}`;
-}
-
-function teacherFullName(teacher) {
-  return [
-    teacher.profile.firstName,
-    teacher.profile.middleName,
-    teacher.profile.lastName,
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
-
-const emptyStudentForm = () => ({
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  studentId: "",
-  mobile: "",
-  email: "",
-  gender: "",
-  bloodGroup: "",
-  citizenshipNo: "",
-  universityRegNo: "",
-  universitySymbolNo: "",
-  guardianName: "",
-  guardianMobile: "",
-  fatherName: "",
-  motherName: "",
-  fatherMobile: "",
-  motherMobile: "",
-  admittedBatch: "",
-  currentLevel: "",
-});
-
-const emptyTeacherForm = () => ({
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  phone: "",
-  address: "",
-  facultyId: "",
-});
+const Field = ({ label, children, optional }) => (
+  <div>
+    <label className={labelClass}>
+      {label}
+      {optional && (
+        <span className="font-normal text-gray-500"> (optional)</span>
+      )}
+    </label>
+    {children}
+  </div>
+);
 
 // ─── Dummy data (MongoDB-style documents) ───────────────────────────────────
 
@@ -350,7 +302,9 @@ export default function Academics() {
   const [faculties, setFaculties] = useState(initialFaculties);
   const [students, setStudents] = useState([]);
   const [activeStudentsForAssignments, setActiveStudentsForAssignments] =
-    useState(dummyStudents.filter((student) => student.enrollment.status === "active"));
+    useState(
+      dummyStudents.filter((student) => student.enrollment.status === "active"),
+    );
   const [teachers, setTeachers] = useState(dummyTeachers);
   const navigate = useNavigate();
 
@@ -378,11 +332,9 @@ export default function Academics() {
     structureType: "semester",
     maxLevel: 8,
   });
-  const [loadingFaculties, setLoadingFaculties] = useState(false);
 
   useEffect(() => {
     const loadFaculties = async () => {
-      setLoadingFaculties(true);
       try {
         const response = await fetchFaculties();
         if (response?.success && Array.isArray(response.data)) {
@@ -393,8 +345,6 @@ export default function Academics() {
         }
       } catch (error) {
         console.error("Failed to fetch faculties:", error);
-      } finally {
-        setLoadingFaculties(false);
       }
     };
 
@@ -423,7 +373,7 @@ export default function Academics() {
     loadStudents();
   }, [filterFacultyId, filterLevel]);
 
-  const loadActiveStudentsForAssignments = async () => {
+  const loadActiveStudentsForAssignments = useCallback(async () => {
     try {
       const response = await fetchStudents();
       if (response?.success && Array.isArray(response.data)) {
@@ -439,13 +389,16 @@ export default function Academics() {
         error,
       );
     }
-  };
-
-  useEffect(() => {
-    loadActiveStudentsForAssignments();
   }, []);
 
-  const loadTeachers = async () => {
+  useEffect(() => {
+    const fetchActiveAssignments = async () => {
+      await loadActiveStudentsForAssignments();
+    };
+    fetchActiveAssignments();
+  }, [loadActiveStudentsForAssignments]);
+
+  const loadTeachers = useCallback(async () => {
     try {
       const response = await fetchTeachers();
       if (response?.success && Array.isArray(response.data)) {
@@ -454,24 +407,20 @@ export default function Academics() {
     } catch (error) {
       console.error("Failed to fetch teachers:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadTeachers();
-  }, []);
+    const fetchTeacherList = async () => {
+      await loadTeachers();
+    };
+    fetchTeacherList();
+  }, [loadTeachers]);
 
   const [resetTarget, setResetTarget] = useState(null);
   const [resetPasswordValue, setResetPasswordValue] = useState("");
   const [resetSuccess, setResetSuccess] = useState(false);
 
   const [duplicateAlert, setDuplicateAlert] = useState(null);
-  const [editingFacultyId, setEditingFacultyId] = useState(null);
-  const [facultyEditForm, setFacultyEditForm] = useState({
-    code: "",
-    name: "",
-    structureType: "semester",
-    maxLevel: 8,
-  });
 
   const filterFaculty = faculties.find((f) => f._id === filterFacultyId);
   const levelOptions = useMemo(
@@ -509,7 +458,7 @@ export default function Academics() {
   const assignmentBadgeClass = (status) =>
     status === "completed"
       ? "rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-800 border border-green-100"
-      : "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800 border border-blue-100";
+      : "rounded-full bg-[var(--color-primary-bg)] px-3 py-1 text-xs font-semibold text-[var(--color-primary-strong)] border border-[var(--color-primary-border)]";
 
   const filteredStudents = students.filter((s) => {
     if (filterFacultyId && s.admission.facultyId !== filterFacultyId)
@@ -534,7 +483,7 @@ export default function Academics() {
 
     // Check if a faculty with the same name already exists and is NOT deleted
     const existingFaculty = faculties.find(
-      (f) => f.name.toLowerCase() === facultyName.toLowerCase() && !f.isDeleted
+      (f) => f.name.toLowerCase() === facultyName.toLowerCase() && !f.isDeleted,
     );
 
     if (existingFaculty) {
@@ -556,7 +505,10 @@ export default function Academics() {
     try {
       const result = await createFaculty(payload);
       if (result?.success && result.data) {
-        const created = { ...result.data, _id: result.data._id ?? result.data.id };
+        const created = {
+          ...result.data,
+          _id: result.data._id ?? result.data.id,
+        };
         setFaculties((current) => [...current, created]);
         setNewFacultyForm({
           code: "",
@@ -569,9 +521,12 @@ export default function Academics() {
       }
     } catch (error) {
       console.error("Error adding faculty:", error);
-      
+
       // Handle E11000 duplicate key error from backend
-      if (error?.message?.includes("E11000") || error?.message?.includes("duplicate")) {
+      if (
+        error?.message?.includes("E11000") ||
+        error?.message?.includes("duplicate")
+      ) {
         setDuplicateAlert({
           name: facultyName,
           code: facultyCode,
@@ -582,59 +537,20 @@ export default function Academics() {
     }
   };
 
-  const startEditFaculty = (faculty) => {
-    setEditingFacultyId(faculty._id);
-    setFacultyEditForm({
-      code: faculty.code,
-      name: faculty.name,
-      structureType: faculty.structureType,
-      maxLevel: faculty.maxLevel,
-    });
-  };
-
-  const cancelEditFaculty = () => {
-    setEditingFacultyId(null);
-    setFacultyEditForm({
-      code: "",
-      name: "",
-      structureType: "semester",
-      maxLevel: 8,
-    });
-  };
-
-  const handleUpdateFaculty = async () => {
-    if (!editingFacultyId) return;
-    if (!facultyEditForm.name.trim() || !facultyEditForm.code.trim()) return;
-
-    const payload = {
-      code: facultyEditForm.code.trim().toUpperCase(),
-      name: facultyEditForm.name.trim(),
-      structureType: facultyEditForm.structureType,
-      maxLevel: Number(facultyEditForm.maxLevel),
-    };
-
-    try {
-      const result = await updateFaculty(editingFacultyId, payload);
-      if (result?.success && result.data) {
-        const updated = { ...result.data, _id: result.data._id ?? result.data.id };
-        setFaculties((current) => current.map((f) => (f._id === editingFacultyId ? updated : f)));
-        cancelEditFaculty();
-      }
-    } catch (error) {
-      console.error("Error updating faculty:", error);
-    }
-  };
-
   const handleSaveStudent = async (payload) => {
     try {
       if (editingStudent) {
         const response = await apiUpdateStudent(editingStudent._id, payload);
         if (response?.success && response.data) {
           setStudents((current) =>
-            current.map((s) => (s._id === editingStudent._id ? response.data : s))
+            current.map((s) =>
+              s._id === editingStudent._id ? response.data : s,
+            ),
           );
           setActiveStudentsForAssignments((current) =>
-            current.map((s) => (s._id === editingStudent._id ? response.data : s)),
+            current.map((s) =>
+              s._id === editingStudent._id ? response.data : s,
+            ),
           );
           setEditingStudent(null);
         }
@@ -642,8 +558,11 @@ export default function Academics() {
         const response = await apiCreateStudent(payload);
         if (response?.success && response.data) {
           setStudents((current) => [response.data, ...current]);
-          setActiveStudentsForAssignments((current) => [response.data, ...current]);
-          
+          setActiveStudentsForAssignments((current) => [
+            response.data,
+            ...current,
+          ]);
+
           if (response.data.credentials?.password) {
             setNewStudentCreds({
               username: response.data.credentials.username,
@@ -702,7 +621,8 @@ export default function Academics() {
   };
 
   const handleDeleteStudent = async (studentId) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) return;
+    if (!window.confirm("Are you sure you want to delete this student?"))
+      return;
     try {
       const response = await apiDeleteStudent(studentId);
       if (response?.success) {
@@ -723,7 +643,9 @@ export default function Academics() {
         const response = await apiUpdateTeacher(editingTeacher._id, payload);
         if (response?.success && response.data) {
           setTeachers((current) =>
-            current.map((t) => (t._id === editingTeacher._id ? response.data : t)),
+            current.map((t) =>
+              t._id === editingTeacher._id ? response.data : t,
+            ),
           );
           setEditingTeacher(null);
         }
@@ -747,7 +669,8 @@ export default function Academics() {
   };
 
   const handleDeleteTeacher = async (teacherId) => {
-    if (!window.confirm("Are you sure you want to delete this teacher?")) return;
+    if (!window.confirm("Are you sure you want to delete this teacher?"))
+      return;
     try {
       const response = await apiDeleteTeacher(teacherId);
       if (response?.success) {
@@ -764,7 +687,9 @@ export default function Academics() {
     const now = new Date().toISOString();
     try {
       if (resetTarget.type === "student") {
-        await apiUpdateStudent(resetTarget.id, { password: resetPasswordValue });
+        await apiUpdateStudent(resetTarget.id, {
+          password: resetPasswordValue,
+        });
         setStudents(
           students.map((s) =>
             s._id === resetTarget.id
@@ -781,7 +706,9 @@ export default function Academics() {
           ),
         );
       } else {
-        await apiUpdateTeacher(resetTarget.id, { password: resetPasswordValue });
+        await apiUpdateTeacher(resetTarget.id, {
+          password: resetPasswordValue,
+        });
         setTeachers(
           teachers.map((t) =>
             t._id === resetTarget.id
@@ -810,18 +737,6 @@ export default function Academics() {
       alert(error.message || "Failed to reset password");
     }
   };
-
-  const Field = ({ label, children, optional }) => (
-    <div>
-      <label className={labelClass}>
-        {label}
-        {optional && (
-          <span className="font-normal text-gray-500"> (optional)</span>
-        )}
-      </label>
-      {children}
-    </div>
-  );
 
   const tabs = [
     { id: "students", label: "Students", icon: Users },
@@ -857,10 +772,13 @@ export default function Academics() {
             <X className="w-5 h-5 text-red-600" />
           </div>
           <div className="flex-grow">
-            <h3 className="font-semibold text-red-900">Faculty already added</h3>
+            <h3 className="font-semibold text-red-900">
+              Faculty already added
+            </h3>
             <p className="text-sm text-red-800 mt-1">
-              A faculty named <strong>{duplicateAlert.name}</strong> ({duplicateAlert.code}) 
-              already exists. Please use a different name.
+              A faculty named <strong>{duplicateAlert.name}</strong> (
+              {duplicateAlert.code}) already exists. Please use a different
+              name.
             </p>
           </div>
           <button
@@ -875,10 +793,11 @@ export default function Academics() {
 
       {/* Add faculty panel */}
       {showAddFaculty && (
-        <div className="bg-white border-2 border-blue-200 rounded-lg p-6 space-y-4">
+        <div className="bg-white border-2 border-[var(--color-primary-border)] rounded-lg p-6 space-y-4">
           <h2 className="text-xl font-bold text-gray-900">Add New Faculty</h2>
           <p className="text-sm text-gray-600">
-            Enter faculty name first, then the faculty code. All fields are required.
+            Enter faculty name first, then the faculty code. All fields are
+            required.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
@@ -891,7 +810,10 @@ export default function Academics() {
                 className={inputClass}
                 value={newFacultyForm.name}
                 onChange={(e) =>
-                  setNewFacultyForm((prev) => ({ ...prev, name: e.target.value }))
+                  setNewFacultyForm((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
                 }
                 placeholder="Bachelor of Computer Applications"
               />
@@ -906,7 +828,10 @@ export default function Academics() {
                 className={inputClass}
                 value={newFacultyForm.code}
                 onChange={(e) =>
-                  setNewFacultyForm((prev) => ({ ...prev, code: e.target.value }))
+                  setNewFacultyForm((prev) => ({
+                    ...prev,
+                    code: e.target.value,
+                  }))
                 }
                 placeholder="e.g. BCA"
               />
@@ -968,9 +893,12 @@ export default function Academics() {
       <div className="bg-white border border-gray-200 rounded-lg p-6 mt-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Faculties overview</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Faculties overview
+            </h2>
             <p className="text-sm text-gray-600">
-              You can still add new faculties here, then manage all existing faculties on the dedicated page.
+              You can still add new faculties here, then manage all existing
+              faculties on the dedicated page.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -998,7 +926,7 @@ export default function Academics() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
               activeTab === id
-                ? "bg-blue-600 text-white"
+                ? "bg-[var(--color-primary)] text-white"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
@@ -1057,7 +985,11 @@ export default function Academics() {
               <label className={labelClass}>Current batch</label>
               <input
                 className={`${inputClass} bg-gray-50 text-gray-600`}
-                value={selectedFilterBatch ? `Batch ${selectedFilterBatch}` : "Auto selected"}
+                value={
+                  selectedFilterBatch
+                    ? `Batch ${selectedFilterBatch}`
+                    : "Auto selected"
+                }
                 readOnly
               />
             </div>
@@ -1068,7 +1000,11 @@ export default function Academics() {
                 setShowAddStudent(true);
               }}
               disabled={!filterFacultyId || !filterLevel}
-              title={(!filterFacultyId || !filterLevel) ? "Select faculty and level/semester first" : ""}
+              title={
+                !filterFacultyId || !filterLevel
+                  ? "Select faculty and level/semester first"
+                  : ""
+              }
             >
               + Add Student
             </Button>
@@ -1079,14 +1015,14 @@ export default function Academics() {
               className="hidden"
               onChange={handleImportStudents}
             />
-       {/*      <Button
+            <Button
               variant="outline"
               onClick={() => studentImportInputRef.current?.click()}
               disabled={importingStudents}
             >
-              <Upload className="w-4 h-4 inline mr-1 text-blue-600" />
+              <Upload className="w-4 h-4 inline mr-1 text-[var(--color-primary)]" />
               {importingStudents ? "Importing" : "Import JSON"}
-            </Button> */}
+            </Button>
           </div>
 
           {importNotice && (
@@ -1117,11 +1053,12 @@ export default function Academics() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
               <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-blue-600" />
+                  <KeyRound className="w-5 h-5 text-[var(--color-primary)]" />
                   Student Credentials Created
                 </h2>
                 <p className="text-sm text-gray-600">
-                  The student has been saved successfully. Please copy the temporary login credentials below:
+                  The student has been saved successfully. Please copy the
+                  temporary login credentials below:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border">
@@ -1154,13 +1091,15 @@ export default function Academics() {
             {!filterFacultyId || !filterLevel ? (
               <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
                 <p className="text-gray-600">
-                  Please select the respective faculty and sem/year to view the current batch.
+                  Please select the respective faculty and sem/year to view the
+                  current batch.
                 </p>
               </div>
             ) : !selectedFilterBatch ? (
               <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
                 <p className="text-gray-600">
-                  No current active batch was found for this faculty and sem/year.
+                  No current active batch was found for this faculty and
+                  sem/year.
                 </p>
               </div>
             ) : filteredStudents.length === 0 ? (
@@ -1186,7 +1125,7 @@ export default function Academics() {
                           {s.graduation.batch}
                         </span>
                       ) : (
-                        <span className="inline-block mt-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                        <span className="inline-block mt-2 rounded-full bg-[var(--color-primary-bg)] px-3 py-1 text-xs font-semibold text-[var(--color-primary-strong)]">
                           {s.enrollment.currentClass}
                         </span>
                       )}
@@ -1194,21 +1133,40 @@ export default function Academics() {
                     <div className="text-right text-sm text-gray-600 space-y-2 flex flex-col items-end justify-between">
                       <div className="space-y-1">
                         <p className="font-semibold text-gray-800">
-                          <span className="text-xs font-normal text-gray-500 mr-1">Username:</span>
+                          <span className="text-xs font-normal text-gray-500 mr-1">
+                            Username:
+                          </span>
                           @{s.credentials?.username}
                         </p>
                         <div className="flex items-center gap-1.5 justify-end">
-                          <span className="text-xs font-normal text-gray-500">Password:</span>
+                          <span className="text-xs font-normal text-gray-500">
+                            Password:
+                          </span>
                           <span className="font-mono font-semibold text-gray-800">
-                            {visiblePasswords[s._id] ? (s.credentials?.password || "Not set") : "••••••••"}
+                            {visiblePasswords[s._id]
+                              ? s.credentials?.password || "Not set"
+                              : "••••••••"}
                           </span>
                           <button
                             type="button"
-                            onClick={() => setVisiblePasswords(prev => ({ ...prev, [s._id]: !prev[s._id] }))}
-                            className="text-gray-400 hover:text-blue-600 transition-colors"
-                            title={visiblePasswords[s._id] ? "Hide password" : "Show password"}
+                            onClick={() =>
+                              setVisiblePasswords((prev) => ({
+                                ...prev,
+                                [s._id]: !prev[s._id],
+                              }))
+                            }
+                            className="text-gray-400 hover:text-[var(--color-primary)] transition-colors"
+                            title={
+                              visiblePasswords[s._id]
+                                ? "Hide password"
+                                : "Show password"
+                            }
                           >
-                            {visiblePasswords[s._id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {visiblePasswords[s._id] ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                         <p className="text-xs text-gray-500">
@@ -1223,7 +1181,7 @@ export default function Academics() {
                             navigate(`/admin/academics/students/${s._id}`)
                           }
                         >
-                          <Eye className="w-3 h-3 inline mr-1 text-blue-600" />
+                          <Eye className="w-3 h-3 inline mr-1 text-[var(--color-primary)]" />
                           View
                         </Button>
                         <Button
@@ -1256,7 +1214,7 @@ export default function Academics() {
                             setResetSuccess(false);
                           }}
                         >
-                          <RefreshCw className="w-3 h-3 inline mr-1 text-blue-600" />
+                          <RefreshCw className="w-3 h-3 inline mr-1 text-[var(--color-primary)]" />
                           Reset
                         </Button>
                       </div>
@@ -1298,11 +1256,12 @@ export default function Academics() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
               <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-blue-600" />
+                  <KeyRound className="w-5 h-5 text-[var(--color-primary)]" />
                   Teacher Credentials Created
                 </h2>
                 <p className="text-sm text-gray-600">
-                  The teacher has been saved successfully. Please copy the temporary login credentials below:
+                  The teacher has been saved successfully. Please copy the
+                  temporary login credentials below:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border">
@@ -1343,8 +1302,8 @@ export default function Academics() {
                     key={t._id}
                     className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
                   >
-                    <div className="flex flex-wrap justify-between gap-4">
-                      <div className="space-y-3">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+                      <div className="min-w-0">
                         <div>
                           <h3 className="text-lg font-bold text-gray-900">
                             {t.profile.firstName} {t.profile.middleName}{" "}
@@ -1353,13 +1312,9 @@ export default function Academics() {
                           <p className="text-sm text-gray-600">
                             {t.profile.address || "Address not set"}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {t.profile.phone}
-                            {t.profile.email ? ` · ${t.profile.email}` : ""}
-                          </p>
                         </div>
 
-                        <div>
+                        <div className="mt-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
                             other assigned subjects
                           </p>
@@ -1372,7 +1327,9 @@ export default function Academics() {
                               {assignedSubjects.map((subject) => (
                                 <span
                                   key={`${subject._id}-${subject.batches.join("-")}`}
-                                  className={assignmentBadgeClass(subject.status)}
+                                  className={assignmentBadgeClass(
+                                    subject.status,
+                                  )}
                                 >
                                   {subject.facultyCode} · {subject.levelLabel} ·{" "}
                                   {subject.name}
@@ -1388,13 +1345,14 @@ export default function Academics() {
                           )}
                         </div>
                       </div>
-                      <div className="text-right text-sm text-gray-600 space-y-2 flex flex-col items-end justify-between">
+
+                      <div className="shrink-0 text-right text-sm text-gray-600 space-y-2 flex flex-col items-end justify-between">
                         <div className="space-y-1">
                           <p className="font-semibold text-gray-800">
                             <span className="text-xs font-normal text-gray-500 mr-1">
                               Username:
                             </span>
-                            @{t.credentials?.username}
+                            @{t.credentials?.username || "not set"}
                           </p>
                           <div className="flex items-center gap-1.5 justify-end">
                             <span className="text-xs font-normal text-gray-500">
@@ -1413,7 +1371,7 @@ export default function Academics() {
                                   [t._id]: !prev[t._id],
                                 }))
                               }
-                              className="text-gray-400 hover:text-blue-600 transition-colors"
+                              className="text-gray-400 hover:text-[var(--color-primary)] transition-colors"
                               title={
                                 visiblePasswords[t._id]
                                   ? "Hide password"
@@ -1427,6 +1385,10 @@ export default function Academics() {
                               )}
                             </button>
                           </div>
+                          <p className="text-xs text-gray-500">
+                            {t.profile?.phone || "Phone not set"}
+                            {t.profile?.email ? ` · ${t.profile.email}` : ""}
+                          </p>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-end">
                           <Button
@@ -1459,7 +1421,7 @@ export default function Academics() {
                               setResetSuccess(false);
                             }}
                           >
-                            <RefreshCw className="w-3 h-3 inline mr-1 text-blue-600" />
+                            <RefreshCw className="w-3 h-3 inline mr-1 text-[var(--color-primary)]" />
                             Reset
                           </Button>
                         </div>

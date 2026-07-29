@@ -1,5 +1,5 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom"
-import { useState } from "react"
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   Menu,
   X,
@@ -12,8 +12,8 @@ import {
   TrendingUp,
   KeyRound,
   FileQuestion,
-} from "lucide-react"
-import { clearSession } from "../utils/authSession"
+} from "lucide-react";
+import { clearSession } from "../utils/authSession";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
@@ -22,31 +22,35 @@ const menuItems = [
   { icon: FileQuestion, label: "Quizzes", path: "/admin/quizzes" },
   { icon: Megaphone, label: "Notices", path: "/admin/notices" },
   { icon: UserCheck, label: "Attendance", path: "/admin/attendance" },
-  { icon: TrendingUp, label: "Student Performance", path: "/admin/student-performance" },
+  {
+    icon: TrendingUp,
+    label: "Student Performance",
+    path: "/admin/student-performance",
+  },
   { icon: KeyRound, label: "Change Password", path: "/admin/change-password" },
-]
+];
 
 export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    clearSession()
-    navigate("/login")
-  }
+    clearSession();
+    navigate("/login");
+  };
 
   const navButtonClass = (isActive) =>
     [
       "w-full flex items-center rounded-xl text-gray-600 transition-all",
       sidebarOpen ? "gap-3 px-4 py-3" : "justify-center p-3",
       isActive
-        ? "bg-blue-50 text-blue-600"
-        : "hover:bg-blue-50/70 hover:text-blue-600",
-    ].join(" ")
+        ? "bg-[var(--color-primary-bg)] text-[var(--color-primary)]"
+        : "hover:bg-[var(--color-primary-bg)] hover:text-[var(--color-primary)]",
+    ].join(" ");
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans">
+    <div className="flex h-screen bg-gray-50 font-sans role-admin">
       <div
         className={`${
           sidebarOpen ? "w-64" : "w-[4.5rem]"
@@ -55,7 +59,7 @@ export default function AdminLayout() {
         <div className="flex items-center justify-between p-5 border-b border-gray-200">
           {sidebarOpen && (
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0 bg-[var(--color-primary)]">
                 A
               </div>
               <span className="text-lg font-bold text-gray-800 truncate tracking-tight">
@@ -81,8 +85,8 @@ export default function AdminLayout() {
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
           {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <button
                 key={item.path}
@@ -96,10 +100,12 @@ export default function AdminLayout() {
                   strokeWidth={isActive ? 2.25 : 2}
                 />
                 {sidebarOpen && (
-                  <span className="font-semibold text-sm truncate">{item.label}</span>
+                  <span className="font-semibold text-sm truncate">
+                    {item.label}
+                  </span>
                 )}
               </button>
-            )
+            );
           })}
         </nav>
 
@@ -113,16 +119,18 @@ export default function AdminLayout() {
             title={!sidebarOpen ? "Logout" : undefined}
           >
             <LogOut className="w-5 h-5 shrink-0" />
-            {sidebarOpen && <span className="font-semibold text-sm">Logout</span>}
+            {sidebarOpen && (
+              <span className="font-semibold text-sm">Logout</span>
+            )}
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-auto min-w-0">
-        <div className="p-8">
+        <div className="p-9">
           <Outlet />
         </div>
       </div>
     </div>
-  )
+  );
 }

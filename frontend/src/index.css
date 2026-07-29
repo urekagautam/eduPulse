@@ -1,27 +1,44 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: 'Nunito', system-ui, sans-serif;
-}
-
 :root {
+  --font-sans: "Nunito", system-ui, sans-serif;
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
+  --surface: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: 'Nunito', system-ui, sans-serif;
-  --heading: 'Nunito', system-ui, sans-serif;
+  --color-primary: #7c3aed;
+  --color-primary-foreground: #ffffff;
+  --color-primary-bg: rgba(124, 58, 237, 0.1);
+  --color-primary-border: rgba(124, 58, 237, 0.2);
+  --color-primary-strong: #5b21b6;
+
+  --color-success: #16a34a;
+  --color-success-bg: rgba(22, 163, 74, 0.12);
+  --color-success-border: rgba(22, 163, 74, 0.2);
+
+  --color-warning: #d97706;
+  --color-warning-bg: rgba(217, 119, 6, 0.12);
+  --color-warning-border: rgba(217, 119, 6, 0.2);
+
+  --color-muted: #6b7280;
+  --input-placeholder: #9ca3af;
+  --input-text: #111827;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+
+  --sans: "Nunito", system-ui, sans-serif;
+  --heading: "Nunito", system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 16px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -34,6 +51,181 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+}
+
+.role-admin,
+.role-teacher,
+.role-student {
+  --surface: var(--bg);
+  --shadow:
+    rgba(0, 0, 0, 0.08) 0 8px 18px -6px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
+
+.role-admin {
+  --accent: #7c3aed;
+  --accent-bg: rgba(124, 58, 237, 0.12);
+  --accent-border: rgba(124, 58, 237, 0.26);
+  --color-primary: #7c3aed;
+  --color-primary-foreground: #ffffff;
+  --color-primary-bg: rgba(124, 58, 237, 0.1);
+  --color-primary-border: rgba(124, 58, 237, 0.2);
+  --color-primary-strong: #5b21b6;
+}
+
+.role-teacher,
+.role-student {
+  --accent: #10b981;
+  --accent-bg: rgba(16, 185, 129, 0.12);
+  --accent-border: rgba(16, 185, 129, 0.26);
+  --color-primary: #059669;
+  --color-primary-foreground: #ffffff;
+  --color-primary-bg: rgba(5, 150, 105, 0.1);
+  --color-primary-border: rgba(5, 150, 105, 0.2);
+  --color-primary-strong: #047857;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+
+.badge-success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-muted {
+  background: rgba(229, 231, 235, 0.8);
+  color: var(--color-muted);
+  border: 1px solid rgba(209, 213, 219, 0.9);
+}
+
+.btn,
+.button,
+.button-primary,
+.button-secondary,
+.button-danger,
+.button-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+  cursor: pointer;
+}
+
+.btn:disabled,
+.button:disabled,
+.button-primary:disabled,
+.button-secondary:disabled,
+.button-danger:disabled,
+.button-outline:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.button-primary,
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border: 1px solid transparent;
+}
+
+.button-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-strong);
+}
+
+.button-secondary,
+.btn-secondary {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+.button-secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.button-danger,
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.button-danger:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.button-outline,
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+
+.button-outline:hover:not(:disabled),
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-primary-bg);
+}
+
+.form-control,
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder,
+.form-select::placeholder {
+  color: var(--input-placeholder);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-border);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,25 +264,23 @@ h1,
 h2 {
   font-family: var(--heading);
   font-weight: 500;
-  /* color: var(--text-h); */
+  margin: 0;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+/* Keep application page titles prominent without the previous oversized scale. */
+.role-admin h1,
+.role-teacher h1,
+.role-student h1 {
+  font-size: 2.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+@media (max-width: 1024px) {
+  .role-admin h1,
+  .role-teacher h1,
+  .role-student h1 {
+    font-size: 2rem;
   }
 }
 p {
@@ -148,16 +338,22 @@ code {
   scrollbar-color: #cbd5e1 #f8fafc;
 }
 
-.grid.gap-6.xl\:grid-cols-2 > section:nth-child(2) .space-y-3::-webkit-scrollbar {
+.grid.gap-6.xl\:grid-cols-2
+  > section:nth-child(2)
+  .space-y-3::-webkit-scrollbar {
   width: 8px;
 }
 
-.grid.gap-6.xl\:grid-cols-2 > section:nth-child(2) .space-y-3::-webkit-scrollbar-track {
+.grid.gap-6.xl\:grid-cols-2
+  > section:nth-child(2)
+  .space-y-3::-webkit-scrollbar-track {
   background: #f8fafc;
   border-radius: 999px;
 }
 
-.grid.gap-6.xl\:grid-cols-2 > section:nth-child(2) .space-y-3::-webkit-scrollbar-thumb {
+.grid.gap-6.xl\:grid-cols-2
+  > section:nth-child(2)
+  .space-y-3::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 999px;
 }

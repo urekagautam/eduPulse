@@ -10,7 +10,8 @@ import {
 
 const statusClass = {
   open: "border-green-100 bg-green-50 text-green-700",
-  scheduled: "border-blue-100 bg-blue-50 text-blue-700",
+  scheduled:
+    "border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]",
   closed: "border-gray-200 bg-gray-50 text-gray-600",
   submitted: "border-green-100 bg-green-50 text-green-700",
 };
@@ -66,10 +67,12 @@ export default function Quizzes() {
   }, []);
 
   useEffect(() => {
-    if (!activeQuiz?.availableUntil || activeQuiz.hasSubmitted) return undefined;
+    if (!activeQuiz?.availableUntil || activeQuiz.hasSubmitted)
+      return undefined;
 
     const updateRemaining = () => {
-      const nextRemaining = new Date(activeQuiz.availableUntil).getTime() - Date.now();
+      const nextRemaining =
+        new Date(activeQuiz.availableUntil).getTime() - Date.now();
       setRemainingMs(nextRemaining);
       if (nextRemaining <= 0 && !submittedRef.current) {
         submittedRef.current = true;
@@ -146,7 +149,8 @@ export default function Quizzes() {
   };
 
   const handleAnswer = (questionId, selectedOption) => {
-    if (!activeQuiz?.isOpen || activeQuiz.hasSubmitted || remainingMs <= 0) return;
+    if (!activeQuiz?.isOpen || activeQuiz.hasSubmitted || remainingMs <= 0)
+      return;
 
     const nextAnswers = { ...answers, [questionId]: selectedOption };
     setAnswers(nextAnswers);
@@ -199,7 +203,9 @@ export default function Quizzes() {
           </p>
         </div>
         <Button variant="secondary" onClick={loadQuizzes} disabled={loading}>
-          <RefreshCw className={`mr-2 inline h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`mr-2 inline h-4 w-4 ${loading ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
@@ -221,7 +227,9 @@ export default function Quizzes() {
           {quizzes.length === 0 ? (
             <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 py-16 text-center lg:col-span-2">
               <Clock className="mx-auto mb-3 h-12 w-12 text-gray-400" />
-              <p className="text-gray-600">No quiz is published for your class yet.</p>
+              <p className="text-gray-600">
+                No quiz is published for your class yet.
+              </p>
             </div>
           ) : (
             quizzes.map((quiz) => (
@@ -305,7 +313,7 @@ export default function Quizzes() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               {!isReviewMode && (
-                <span className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-2 font-mono text-lg font-bold text-blue-700">
+                <span className="rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-2 font-mono text-lg font-bold text-[var(--color-primary-strong)]">
                   {formatRemaining(remainingMs)}
                 </span>
               )}
@@ -334,26 +342,28 @@ export default function Quizzes() {
                       className={`flex min-h-12 items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition disabled:cursor-not-allowed ${
                         isReviewMode && option.label === question.correctOption
                           ? "border-green-300 bg-green-50 text-green-900"
-                          : isReviewMode && answers[question.id] === option.label
-                            ? "border-blue-300 bg-blue-50 text-blue-900"
+                          : isReviewMode &&
+                              answers[question.id] === option.label
+                            ? "border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
                             : answers[question.id] === option.label
-                              ? "border-blue-600 bg-blue-50 text-blue-900"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-blue-200"
+                              ? "border-[var(--color-primary)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-[var(--color-primary-border)]"
                       }`}
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-gray-100 text-xs font-bold">
                         {option.label}
                       </span>
                       <span className="flex-1">{option.text}</span>
-                      {isReviewMode && option.label === question.correctOption && (
-                        <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-bold text-green-700">
-                          Correct
-                        </span>
-                      )}
+                      {isReviewMode &&
+                        option.label === question.correctOption && (
+                          <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-bold text-green-700">
+                            Correct
+                          </span>
+                        )}
                       {isReviewMode &&
                         answers[question.id] === option.label &&
                         option.label !== question.correctOption && (
-                          <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-700">
+                          <span className="rounded-full bg-[var(--color-primary-bg)] px-2 py-1 text-xs font-bold text-[var(--color-primary-strong)]">
                             Your answer
                           </span>
                         )}
@@ -371,9 +381,13 @@ export default function Quizzes() {
           ) : (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-gray-500">
-                You can submit anytime. If time ends, saved answers are submitted automatically.
+                You can submit anytime. If time ends, saved answers are
+                submitted automatically.
               </p>
-              <Button onClick={() => submitQuiz()} disabled={submitting || remainingMs <= 0}>
+              <Button
+                onClick={() => submitQuiz()}
+                disabled={submitting || remainingMs <= 0}
+              >
                 {submitting ? "Submitting" : "Submit quiz"}
               </Button>
             </div>

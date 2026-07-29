@@ -46,6 +46,23 @@ export const createSubject = async (subject) => {
   return handleResponse(response);
 };
 
+export const updateSubject = async (subjectId, subject) => {
+  const response = await fetch(`${SUBJECTS_API_URL}/${subjectId}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(subject),
+  });
+  return handleResponse(response);
+};
+
+export const deleteSubject = async (subjectId) => {
+  const response = await fetch(`${SUBJECTS_API_URL}/${subjectId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  return handleResponse(response);
+};
+
 export const assignSubjectTeacher = async (subjectId, teacherId, batch) => {
   const response = await fetch(`${SUBJECTS_API_URL}/${subjectId}/teacher`, {
     method: "PUT",

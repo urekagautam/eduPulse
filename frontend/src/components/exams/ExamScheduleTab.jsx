@@ -12,7 +12,7 @@ import {
 } from "../../services/apiExam";
 
 const inputClass =
-  "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const EXAM_TEMPLATES = [
@@ -26,14 +26,17 @@ const today = new Date().toISOString().split("T")[0];
 const defaultExamTime = "07:00";
 
 const getLevelLabel = (faculty, level) => {
-  const match = faculty?.levels?.find((item) => String(item.value) === String(level));
+  const match = faculty?.levels?.find(
+    (item) => String(item.value) === String(level),
+  );
   if (match) return match.label;
   return `${faculty?.structureType === "year" ? "Year" : "Semester"} ${level}`;
 };
 
 const getLevelOptions = (faculty) => {
   if (!faculty) return [];
-  if (Array.isArray(faculty.levels) && faculty.levels.length) return faculty.levels;
+  if (Array.isArray(faculty.levels) && faculty.levels.length)
+    return faculty.levels;
 
   const max = Math.max(Number(faculty.maxLevel) || 1, 1);
   return Array.from({ length: max }, (_, index) => ({
@@ -74,7 +77,9 @@ export default function ExamScheduleTab() {
   const [editingExam, setEditingExam] = useState(null);
   const [expandedScheduleId, setExpandedScheduleId] = useState(null);
 
-  const selectedFaculty = faculties.find((faculty) => faculty._id === selectedFacultyId);
+  const selectedFaculty = faculties.find(
+    (faculty) => faculty._id === selectedFacultyId,
+  );
   const levelOptions = useMemo(
     () => getLevelOptions(selectedFaculty),
     [selectedFaculty],
@@ -121,7 +126,9 @@ export default function ExamScheduleTab() {
           setFaculties(normalized);
           if (normalized.length) {
             setSelectedFacultyId(normalized[0]._id);
-            setSelectedLevel(String(getLevelOptions(normalized[0])[0]?.value || ""));
+            setSelectedLevel(
+              String(getLevelOptions(normalized[0])[0]?.value || ""),
+            );
           }
         }
       } catch (error) {
@@ -335,9 +342,13 @@ export default function ExamScheduleTab() {
               value={selectedFacultyId}
               onChange={(event) => {
                 const facultyId = event.target.value;
-                const faculty = faculties.find((item) => item._id === facultyId);
+                const faculty = faculties.find(
+                  (item) => item._id === facultyId,
+                );
                 setSelectedFacultyId(facultyId);
-                setSelectedLevel(String(getLevelOptions(faculty)[0]?.value || ""));
+                setSelectedLevel(
+                  String(getLevelOptions(faculty)[0]?.value || ""),
+                );
               }}
               className={inputClass}
             >
@@ -379,7 +390,9 @@ export default function ExamScheduleTab() {
           </div>
           <Button
             onClick={openCreateExam}
-            disabled={!selectedFacultyId || !selectedLevel || !selectedExamBatch}
+            disabled={
+              !selectedFacultyId || !selectedLevel || !selectedExamBatch
+            }
           >
             Create Exam
           </Button>
@@ -405,7 +418,8 @@ export default function ExamScheduleTab() {
           ) : !currentSchedule || currentSchedule.exams.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
               <p className="text-gray-500">
-                No exams created yet for Batch {selectedExamBatch} in this class.
+                No exams created yet for Batch {selectedExamBatch} in this
+                class.
               </p>
             </div>
           ) : (
@@ -438,7 +452,7 @@ export default function ExamScheduleTab() {
                         {exam.published ? "Published" : "Not published"}
                       </p>
                       {exam.notice && (
-                        <p className="mt-1 text-xs font-medium text-blue-700">
+                        <p className="mt-1 text-xs font-medium text-[var(--color-primary-strong)]">
                           Note: {exam.notice}
                         </p>
                       )}
@@ -451,7 +465,7 @@ export default function ExamScheduleTab() {
                         event.stopPropagation();
                         openEditExam(exam);
                       }}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                      className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-bg)] rounded-lg"
                       title="Edit Exam"
                     >
                       <Pencil className="w-4 h-4" />
@@ -517,7 +531,8 @@ export default function ExamScheduleTab() {
             <div className="flex justify-between items-center border-b border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingExam ? "Edit" : "Create"} Exam for{" "}
-                {selectedFaculty?.code} - {levelLabel} - Batch {selectedExamBatch}
+                {selectedFaculty?.code} - {levelLabel} - Batch{" "}
+                {selectedExamBatch}
               </h2>
               <button
                 type="button"
@@ -550,7 +565,7 @@ export default function ExamScheduleTab() {
                           }
                           className={`px-3 py-2 rounded-lg text-sm border ${
                             examForm.title === template && !examForm.isCustom
-                              ? "bg-blue-50 border-blue-300 text-blue-700"
+                              ? "bg-[var(--color-primary-bg)] border-[var(--color-primary-border)] text-[var(--color-primary-strong)]"
                               : "bg-white border-gray-200 hover:bg-gray-50"
                           }`}
                         >
@@ -652,9 +667,11 @@ export default function ExamScheduleTab() {
                           type="checkbox"
                           checked={item.included}
                           onChange={(event) =>
-                            updateRow(item.id, { included: event.target.checked })
+                            updateRow(item.id, {
+                              included: event.target.checked,
+                            })
                           }
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                          className="h-4 w-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                           title="Include subject"
                         />
                       </div>

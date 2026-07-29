@@ -51,7 +51,7 @@ export const loginAdmin = async (req, res, next) => {
       ACCESS_TOKEN_SECRET,
       {
         expiresIn: "3d",
-      }
+      },
     );
 
     res.status(200).json(
@@ -72,9 +72,54 @@ export const loginAdmin = async (req, res, next) => {
             role: loginRole,
           },
         },
-        "Login successful"
-      )
+        "Login successful",
+      ),
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      throw new ApiError(400, "Current and new password are required");
+    }
+
+    if (newPassword.length < 8) {
+      throw new ApiError(400, "New password must be at least 8 characters");
+    }
+
+    const userId = req.user?._id;
+    if (!userId) throw new ApiError(401, "Unauthorized");
+
+    // find user across possible collections
+    let user =
+      (await Admin.findById(userId)) ||
+      (await Teacher.findById(userId)) ||
+      (await Student.findById(userId));
+
+    if (!user) throw new ApiError(404, "User not found");
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) throw new ApiError(401, "Current password is incorrect");
+
+    if (await bcrypt.compare(newPassword, user.password)) {
+      throw new ApiError(
+        400,
+        "New password must be different from current password",
+      );
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password updated successfully"));
   } catch (error) {
     next(error);
   }

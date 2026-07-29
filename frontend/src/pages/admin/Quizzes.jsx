@@ -5,7 +5,7 @@ import { fetchFaculties } from "../../services/apiFaculty";
 import { fetchAdminQuizzes, publishAdminQuiz } from "../../services/apiQuiz";
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100";
+  "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-bg)]";
 const labelClass = "mb-1 block text-xs font-semibold text-gray-600";
 
 const splitSchedule = (from = "", until = "") => ({
@@ -22,7 +22,7 @@ const isSameDate = (value, date) => {
 const statusClass = (status) => {
   if (status === "closed") return "bg-gray-100 text-gray-700 ring-gray-200";
   if (status === "published") return "bg-green-50 text-green-700 ring-green-100";
-  return "bg-blue-50 text-blue-700 ring-blue-100";
+  return "bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)] ring-[var(--color-primary-bg)]";
 };
 
 export default function Quizzes() {
@@ -391,7 +391,7 @@ export default function Quizzes() {
                     }));
                     setSelectedQuiz(quiz);
                   }}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-left hover:border-blue-200 hover:bg-blue-50"
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-left hover:border-[var(--color-primary-border)] hover:bg-[var(--color-primary-bg)]"
                 >
                   <p className="font-bold text-gray-900">{quiz.subjectName}</p>
                   <p className="mt-1 text-sm text-gray-600">{quiz.groupLabel}</p>
@@ -433,7 +433,7 @@ export default function Quizzes() {
                   </h2>
                   <p className="text-sm text-gray-600">{group.facultyName}</p>
                 </div>
-                <p className="text-sm font-semibold text-blue-700">
+                <p className="text-sm font-semibold text-[var(--color-primary-strong)]">
                   {group.quizzes.length} subjects - {group.totalMarks} marks
                 </p>
               </div>

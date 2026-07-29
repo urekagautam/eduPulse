@@ -10,7 +10,7 @@ import {
 
 const optionLabels = ["A", "B", "C", "D"];
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100";
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-bg)]";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const makeEmptyQuestions = () =>
@@ -156,15 +156,20 @@ export default function Quizzes() {
                 onChange={(event) => setSelectedOfferingId(event.target.value)}
               >
                 {assignments.map((item) => (
-                  <option key={item.classOfferingId} value={item.classOfferingId}>
+                  <option
+                    key={item.classOfferingId}
+                    value={item.classOfferingId}
+                  >
                     {item.facultyCode} - {item.levelLabel} - {item.subjectName}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase text-blue-700">Status</p>
-              <p className="mt-1 text-sm font-bold capitalize text-blue-950">
+            <div className="rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase text-[var(--color-primary-strong)]">
+                Status
+              </p>
+              <p className="mt-1 text-sm font-bold capitalize text-[var(--color-primary-strong)]">
                 {status.replace("_", " ")}
               </p>
             </div>
@@ -215,7 +220,10 @@ export default function Quizzes() {
                 )}
                 Save draft
               </Button>
-              <Button onClick={() => saveQuiz(true)} disabled={saving || !canEdit}>
+              <Button
+                onClick={() => saveQuiz(true)}
+                disabled={saving || !canEdit}
+              >
                 <Send className="mr-2 inline h-4 w-4" />
                 Save and send
               </Button>
@@ -264,8 +272,9 @@ export default function Quizzes() {
                       <input
                         className={`${inputClass} bg-white`}
                         value={
-                          question.options.find((option) => option.label === label)
-                            ?.text || ""
+                          question.options.find(
+                            (option) => option.label === label,
+                          )?.text || ""
                         }
                         disabled={!canEdit}
                         onChange={(event) =>
@@ -285,11 +294,13 @@ export default function Quizzes() {
                         key={label}
                         type="button"
                         disabled={!canEdit}
-                        onClick={() => updateQuestion(index, "correctOption", label)}
+                        onClick={() =>
+                          updateQuestion(index, "correctOption", label)
+                        }
                         className={`h-10 w-12 rounded-lg text-sm font-bold ring-1 transition ${
                           question.correctOption === label
-                            ? "bg-blue-600 text-white ring-blue-600"
-                            : "bg-white text-gray-700 ring-gray-200 hover:bg-blue-50"
+                            ? "bg-[var(--color-primary)] text-white ring-[var(--color-primary)]"
+                            : "bg-white text-gray-700 ring-gray-200 hover:bg-[var(--color-primary-bg)]"
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {label}

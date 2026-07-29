@@ -5,7 +5,7 @@ import { fetchStudents } from "../../../services/apiAddStudent";
 import { batchUpgradeStudents } from "../../../services/apiBatchUpgrade";
 
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const SEMESTER_NAMES = [

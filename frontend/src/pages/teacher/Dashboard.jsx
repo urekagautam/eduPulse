@@ -16,7 +16,7 @@ const cardClass = "rounded-lg border border-gray-200 bg-white p-5 shadow-sm";
 const colorClass = {
   red: "border-red-100 bg-red-50 text-red-700",
   yellow: "border-yellow-100 bg-yellow-50 text-yellow-800",
-  blue: "border-blue-100 bg-blue-50 text-blue-700",
+  blue: "border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]",
   green: "border-green-100 bg-green-50 text-green-700",
   gray: "border-gray-100 bg-gray-50 text-gray-700",
 };
@@ -24,7 +24,7 @@ const colorClass = {
 const dotClass = {
   red: "bg-red-500",
   yellow: "bg-yellow-500",
-  blue: "bg-blue-500",
+  blue: "bg-[var(--color-primary-bg)]0",
   green: "bg-green-500",
   gray: "bg-gray-500",
 };
@@ -108,7 +108,7 @@ export default function Dashboard() {
             Current class overview for students in your assigned subjects.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+        <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-strong)]">
           <BrainCircuit className="h-4 w-4" />
           Student grouping
         </div>
@@ -128,7 +128,7 @@ export default function Dashboard() {
           <select
             value={selectedClassKey}
             onChange={(event) => setSelectedClassKey(event.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 md:max-w-xl"
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] md:max-w-xl"
           >
             {classOptions.map((group) => (
               <option
@@ -149,14 +149,14 @@ export default function Dashboard() {
 
       {loading ? (
         <div className={cardClass}>
-          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+          <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
           <p className="text-center text-gray-600">Loading class analytics...</p>
         </div>
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-4">
             <div className={cardClass}>
-              <Users className="mb-3 h-5 w-5 text-blue-600" />
+              <Users className="mb-3 h-5 w-5 text-[var(--color-primary)]" />
               <p className="text-sm text-gray-500">Students reviewed</p>
               <p className="mt-1 text-3xl font-bold text-gray-900">{dashboard?.trainedSampleCount || 0}</p>
             </div>
@@ -235,7 +235,7 @@ export default function Dashboard() {
                     setSelectedGroup(cluster);
                     setGroupSearch("");
                   }}
-                  className="mt-4 w-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                  className="mt-4 w-full rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-strong)] hover:bg-[var(--color-primary-bg)]"
                 >
                   View all students
                 </button>
@@ -320,7 +320,7 @@ export default function Dashboard() {
                 <input
                   value={groupSearch}
                   onChange={(event) => setGroupSearch(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="Search by student name, ID, semester, or batch"
                 />
               </div>

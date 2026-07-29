@@ -17,7 +17,7 @@ import {
 } from "../../services/apiAttendance";
 
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 function getLevelOptions(faculty) {
@@ -349,7 +349,7 @@ export default function Attendance() {
               onClick={() => setCategory("general")}
               className={`rounded-md px-4 py-2 text-sm font-semibold ${
                 category === "general"
-                  ? "bg-white text-blue-600 shadow-sm"
+                  ? "bg-white text-[var(--color-primary)] shadow-sm"
                   : "text-gray-600"
               }`}
             >
@@ -360,7 +360,7 @@ export default function Attendance() {
               onClick={() => setCategory("exam")}
               className={`rounded-md px-4 py-2 text-sm font-semibold ${
                 category === "exam"
-                  ? "bg-white text-blue-600 shadow-sm"
+                  ? "bg-white text-[var(--color-primary)] shadow-sm"
                   : "text-gray-600"
               }`}
             >
@@ -382,7 +382,7 @@ export default function Attendance() {
         </div>
       ) : category === "general" ? (
         <div className="space-y-6">
-          <div className="flex gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <div className="flex gap-3 rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-3 text-sm text-[var(--color-primary-strong)]">
             <Info className="h-5 w-5 shrink-0" />
             <p>
               General attendance is recorded by teachers during regular classes.
@@ -392,7 +392,7 @@ export default function Attendance() {
 
           {loading ? (
             <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-gray-600">
-              <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+              <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
               Loading attendance...
             </div>
           ) : !generalClasses.length ? (
@@ -454,7 +454,7 @@ export default function Attendance() {
                                 {summary.absent || 0}
                               </td>
                               <td className="px-4 py-3 text-center">
-                                <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">
+                                <span className="rounded-full bg-[var(--color-primary-bg)] px-2 py-1 text-xs font-bold text-[var(--color-primary-strong)]">
                                   {summary.percentage || 0}%
                                 </span>
                               </td>
@@ -466,7 +466,7 @@ export default function Attendance() {
                                       expanded ? null : student._id,
                                     )
                                   }
-                                  className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+                                  className="text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-strong)]"
                                 >
                                   {expanded ? "Hide" : "View"} ({records.length})
                                 </button>
@@ -577,7 +577,7 @@ export default function Attendance() {
             </div>
 
             {selectedSession && (
-              <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+              <div className="mt-5 rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-3 text-sm text-[var(--color-primary-strong)]">
                 <strong>{selectedSession.title}</strong> ·{" "}
                 {selectedSession.subjectName} · {formatDate(selectedSession.date)}{" "}
                 at {selectedSession.time} · Batch {selectedSession.batch}
@@ -587,7 +587,7 @@ export default function Attendance() {
 
           {loading ? (
             <div className="rounded-lg border border-gray-200 bg-white p-10 text-center text-gray-600">
-              <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-blue-600" />
+              <RefreshCw className="mx-auto mb-3 h-6 w-6 animate-spin text-[var(--color-primary)]" />
               Loading exam attendance...
             </div>
           ) : !examsForClass.length ? (
@@ -662,7 +662,7 @@ export default function Attendance() {
                                   [student._id]: event.target.checked,
                                 }))
                               }
-                              className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                              className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                               aria-label={`Present at exam for ${student.name}`}
                             />
                           </td>

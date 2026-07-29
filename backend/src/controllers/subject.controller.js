@@ -145,6 +145,74 @@ export const createSubject = async (req, res, next) => {
   }
 };
 
+export const updateSubject = async (req, res, next) => {
+  try {
+    const { subjectId } = req.params;
+    const { name, code } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+      throw new ApiError(400, "Valid subject is required");
+    }
+    if (!name?.trim()) {
+      throw new ApiError(400, "Subject name is required");
+    }
+
+    const subject = await Subject.findById(subjectId);
+    if (!subject) throw new ApiError(404, "Subject not found");
+
+    const subjectName = name.trim();
+    const subjectCode = code?.trim() || "";
+    const duplicate = await Subject.findOne({
+      _id: { $ne: subject._id },
+      facultyId: subject.facultyId,
+      level: subject.level,
+      $or: [
+        { subject_name: subjectName },
+        ...(subjectCode ? [{ subject_code: subjectCode }] : []),
+      ],
+    });
+    if (duplicate) {
+      throw new ApiError(409, "Subject already exists for this class");
+    }
+
+    subject.subject_name = subjectName;
+    subject.subject_code = subjectCode;
+    await subject.save();
+
+    const populated = await Subject.findById(subject._id).populate("facultyId");
+    res
+      .status(200)
+      .json(new ApiResponse(200, normalizeSubject(populated), "Subject updated successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSubject = async (req, res, next) => {
+  try {
+    const { subjectId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+      throw new ApiError(400, "Valid subject is required");
+    }
+
+    const subject = await Subject.findById(subjectId);
+    if (!subject) throw new ApiError(404, "Subject not found");
+
+    const hasAssignments = await ClassOffering.exists({ subjectId: subject._id });
+    if (hasAssignments) {
+      throw new ApiError(
+        409,
+        "This subject has teacher assignments and cannot be deleted.",
+      );
+    }
+
+    await subject.deleteOne();
+    res.status(200).json(new ApiResponse(200, null, "Subject deleted successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const assignSubjectTeacher = async (req, res, next) => {
   try {
     const { subjectId } = req.params;

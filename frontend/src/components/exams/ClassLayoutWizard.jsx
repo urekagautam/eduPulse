@@ -15,7 +15,7 @@ const STEPS = [
 const emptySection = () => ({ rows: 4, seatsPerRow: 2 });
 
 const inputClass =
-  "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 
 export default function ClassLayoutWizard({ onSave, onCancel, initialLayout = null }) {
   const [step, setStep] = useState(0);
@@ -88,9 +88,9 @@ export default function ClassLayoutWizard({ onSave, onCancel, initialLayout = nu
               key={label}
               className={`text-xs px-3 py-1 rounded-full font-medium ${
                 i === step
-                  ? "bg-blue-600 text-white"
+                  ? "bg-[var(--color-primary)] text-white"
                   : i < step
-                    ? "bg-blue-100 text-blue-700"
+                    ? "bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
                     : "bg-gray-200 text-gray-500"
               }`}
             >
@@ -129,7 +129,7 @@ export default function ClassLayoutWizard({ onSave, onCancel, initialLayout = nu
                       onClick={() => setCount(n)}
                       className={`px-4 py-2 rounded-lg border-2 font-medium ${
                         sectionCount === n
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
+                          ? "border-[var(--color-primary)] bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
@@ -183,7 +183,7 @@ export default function ClassLayoutWizard({ onSave, onCancel, initialLayout = nu
                           onClick={() => updateSec(i, "seatsPerRow", n)}
                           className={`px-4 py-1 rounded-lg border ${
                             sec.seatsPerRow === n
-                              ? "bg-blue-600 text-white border-blue-600"
+                              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
                               : "border-gray-300"
                           }`}
                         >

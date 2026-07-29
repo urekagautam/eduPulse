@@ -16,7 +16,7 @@ import Button from "../Button";
 import { Plus, Trash2, Check } from "lucide-react";
 
 const inputClass =
-  "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const DUMMY_RESULT_STUDENTS = [
@@ -279,7 +279,7 @@ export default function ExamMarksTab({ schedules }) {
           </div>
         )}
 
-        <div className="mb-6 rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
+        <div className="mb-6 rounded-lg bg-[var(--color-primary-bg)] p-4 text-sm text-[var(--color-primary-strong)]">
           <strong>Instructions:</strong> Enter marks for each student in each
           subject. Mark students as absent if they didn't take the exam. Marks
           showing "Abs" will override individual subject marks.
@@ -344,7 +344,7 @@ export default function ExamMarksTab({ schedules }) {
                             )
                           }
                           disabled={isAbsent(student.studentId)}
-                          className={`w-full px-2 py-1 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                          className={`w-full px-2 py-1 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                             isAbsent(student.studentId)
                               ? "bg-gray-100 text-gray-500 cursor-not-allowed"
                               : ""
@@ -376,7 +376,7 @@ export default function ExamMarksTab({ schedules }) {
         <div className="mt-6 flex justify-end">
           <Button
             onClick={handleSaveMarks}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            className="px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-strong)] text-white font-semibold rounded-lg transition-colors"
           >
             Save Marks & Attendance
           </Button>

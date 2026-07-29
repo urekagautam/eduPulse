@@ -16,7 +16,7 @@ export default function Exams() {
           <button
             key={t.id}
             type="button"
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-white text-blue-600 shadow-sm"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-white text-[var(--color-primary)] shadow-sm"
           >
             {t.label}
           </button>

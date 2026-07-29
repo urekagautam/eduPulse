@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Pencil, Search, Trash2 } from "lucide-react";
 import Button from "../../../components/Button";
 import {
   assignSubjectTeacher,
   createSubject,
+  deleteSubject,
   fetchSubjects,
+  updateSubject,
 } from "../../../services/apiSubject";
 
 const inputClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white";
+  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const SEMESTER_NAMES = [
@@ -66,9 +68,7 @@ function Field({ label, children, optional }) {
 }
 
 const assignmentBadgeClass = (status) =>
-  status === "completed"
-    ? "rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-800 border border-green-100"
-    : "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800 border border-blue-100";
+  status === "completed" ? "badge badge-success" : "badge badge-primary";
 
 export default function SubjectsTab({
   faculties,
@@ -81,6 +81,7 @@ export default function SubjectsTab({
   const [subjectLevel, setSubjectLevel] = useState("");
   const [subjectBatch, setSubjectBatch] = useState("");
   const [subjectForm, setSubjectForm] = useState({ name: "", code: "" });
+  const [editingSubject, setEditingSubject] = useState(null);
   const [teacherSearch, setTeacherSearch] = useState({});
   const [teacherDropdownOpenId, setTeacherDropdownOpenId] = useState(null);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -164,23 +165,35 @@ export default function SubjectsTab({
       });
   };
 
-  const handleAddSubject = async () => {
+  const handleSaveSubject = async () => {
     const faculty = subjectFaculty;
     if (!faculty || !subjectLevel || !subjectForm.name.trim()) return;
 
     setSavingSubject(true);
     setNotice({ type: "", message: "" });
     try {
-      const response = await createSubject({
+      const payload = {
         name: subjectForm.name.trim(),
         code: subjectForm.code.trim(),
-        facultyId: faculty._id,
-        level: Number(subjectLevel),
-      });
+      };
+      const response = editingSubject
+        ? await updateSubject(editingSubject._id, payload)
+        : await createSubject({
+            ...payload,
+            facultyId: faculty._id,
+            level: Number(subjectLevel),
+          });
 
       if (response?.success && response.data) {
-        setSubjects((current) => [response.data, ...current]);
+        setSubjects((current) =>
+          editingSubject
+            ? current.map((subject) =>
+                subject._id === editingSubject._id ? response.data : subject,
+              )
+            : [response.data, ...current],
+        );
         setSubjectForm({ name: "", code: "" });
+        setEditingSubject(null);
       }
     } catch (error) {
       setNotice({
@@ -189,6 +202,32 @@ export default function SubjectsTab({
       });
     } finally {
       setSavingSubject(false);
+    }
+  };
+
+  const handleDeleteSubject = async (subject) => {
+    if (!window.confirm(`Delete ${subject.name}? This cannot be undone.`)) {
+      return;
+    }
+
+    setNotice({ type: "", message: "" });
+    try {
+      const response = await deleteSubject(subject._id);
+      if (response?.success) {
+        setSubjects((current) =>
+          current.filter((item) => item._id !== subject._id),
+        );
+        if (editingSubject?._id === subject._id) {
+          setEditingSubject(null);
+          setSubjectForm({ name: "", code: "" });
+        }
+        setNotice({ type: "success", message: "Subject deleted successfully." });
+      }
+    } catch (error) {
+      setNotice({
+        type: "error",
+        message: error.message || "Failed to delete subject.",
+      });
     }
   };
 
@@ -277,13 +316,13 @@ export default function SubjectsTab({
               aria-label="Close teacher list"
               onClick={closeDropdown}
             />
-            <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+            <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
               <div className="border-b border-gray-100 p-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     placeholder="Search by name, faculty, phone..."
                     value={q}
                     onChange={(e) =>
@@ -297,7 +336,7 @@ export default function SubjectsTab({
                 </div>
               </div>
 
-              <ul className="max-h-52 overflow-y-auto py-1" role="listbox">
+              <ul className="max-h-[45vh] overflow-y-auto py-1" role="listbox">
                 {filtered.length === 0 ? (
                   <li className="px-4 py-3 text-sm text-gray-500">
                     No teachers found. Add teachers in the Teachers tab first.
@@ -313,7 +352,7 @@ export default function SubjectsTab({
                           aria-selected={isSelected}
                           className={`flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition-colors ${
                             isSelected
-                              ? "bg-blue-50 text-blue-800"
+                              ? "bg-[var(--color-primary-bg)] text-[var(--color-primary-strong)]"
                               : "hover:bg-gray-50"
                           }`}
                           onClick={() => pickTeacher(t._id)}
@@ -345,9 +384,7 @@ export default function SubjectsTab({
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-bold text-gray-900">
-          Class subjects
-        </h2>
+        <h2 className="mb-4 text-lg font-bold text-gray-900">Class subjects</h2>
         <p className="mb-4 text-sm text-gray-600">
           Add subjects per faculty and level. Teacher assignment is handled per
           batch below.
@@ -412,8 +449,24 @@ export default function SubjectsTab({
 
       {subjectFacultyId && subjectLevel && (
         <>
-          <div className="rounded-lg border-2 border-blue-200 bg-white p-6 space-y-4">
-            <h3 className="font-bold text-gray-900">Add subject</h3>
+          <div className="rounded-lg border-2 border-[var(--color-primary-border)] bg-white p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-bold text-gray-900">
+                {editingSubject ? "Edit subject" : "Add subject"}
+              </h3>
+              {editingSubject && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEditingSubject(null);
+                    setSubjectForm({ name: "", code: "" });
+                  }}
+                >
+                  Cancel edit
+                </Button>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Field label="Subject name">
                 <input
@@ -438,10 +491,14 @@ export default function SubjectsTab({
               <div className="flex items-end">
                 <Button
                   variant="primary"
-                  onClick={handleAddSubject}
+                  onClick={handleSaveSubject}
                   disabled={savingSubject}
                 >
-                  {savingSubject ? "Adding..." : "Add subject"}
+                  {savingSubject
+                    ? "Saving..."
+                    : editingSubject
+                      ? "Save changes"
+                      : "Add subject"}
                 </Button>
               </div>
             </div>
@@ -471,13 +528,40 @@ export default function SubjectsTab({
                         <p className="font-semibold text-gray-900">
                           {sub.name}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          Code:{" "}
-                          <span className="font-mono">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                          <span>Code:</span>
+                          <span className="badge badge-muted">
                             {sub.code || "Not set"}
-                          </span>{" "}
-                          - {sub.facultyCode} - {sub.levelLabel}
-                        </p>
+                          </span>
+                          <span className="badge badge-primary">
+                            {sub.facultyCode}
+                          </span>
+                          <span className="badge badge-muted">
+                            {sub.levelLabel}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingSubject(sub);
+                            setSubjectForm({
+                              name: sub.name || "",
+                              code: sub.code || "",
+                            });
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteSubject(sub)}
+                        >
+                          <Trash2 className="h-3 w-3" /> Delete
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -491,7 +575,11 @@ export default function SubjectsTab({
                 <Field label="Current batch">
                   <input
                     className={`${inputClass} bg-gray-50 text-gray-600`}
-                    value={selectedSubjectBatch ? `Batch ${selectedSubjectBatch}` : "Auto selected"}
+                    value={
+                      selectedSubjectBatch
+                        ? `Batch ${selectedSubjectBatch}`
+                        : "Auto selected"
+                    }
                     readOnly
                   />
                 </Field>
@@ -499,86 +587,112 @@ export default function SubjectsTab({
 
               {!selectedSubjectBatch ? (
                 <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 py-10 text-center text-gray-600">
-                  No current active batch was found for this faculty and sem/year.
+                  No current active batch was found for this faculty and
+                  sem/year.
                 </div>
               ) : (
                 subjects.map((sub) => (
-                <div
-                  key={sub._id}
-                  className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4"
-                >
-                  <div className="flex flex-wrap justify-between gap-3">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {sub.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Code: <span className="font-mono">{sub.code}</span>{" "}
-                        - {sub.facultyCode} - {sub.levelLabel}
-                      </p>
+                  <div
+                    key={sub._id}
+                    className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4"
+                  >
+                    <div className="flex flex-wrap justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {sub.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Code: <span className="font-mono">{sub.code}</span> -{" "}
+                          {sub.facultyCode} - {sub.levelLabel}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {selectedSubjectBatch && sub.assignedTeacher ? (
+                          <>
+                            <span className="badge badge-success">
+                              {sub.assignedTeacher.fullName}
+                            </span>
+                            <span className="badge badge-primary">
+                              Batch {selectedSubjectBatch}
+                            </span>
+                          </>
+                        ) : selectedSubjectBatch ? (
+                          <span className="badge badge-muted">
+                            No teacher assigned
+                          </span>
+                        ) : (
+                          <span className="badge badge-muted">
+                            Select batch to assign teacher
+                          </span>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingSubject(sub);
+                            setSubjectForm({
+                              name: sub.name || "",
+                              code: sub.code || "",
+                            });
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteSubject(sub)}
+                        >
+                          <Trash2 className="h-3 w-3" /> Delete
+                        </Button>
+                      </div>
                     </div>
-                    {selectedSubjectBatch && sub.assignedTeacher ? (
-                      <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-                          {sub.assignedTeacher.fullName}
-                        </span>
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800 border border-blue-100">
-                        Batch {selectedSubjectBatch}
-                      </span>
-                    </div>
-                    ) : selectedSubjectBatch ? (
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        No teacher assigned
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                        Select batch to assign teacher
-                      </span>
+
+                    {selectedSubjectBatch && (
+                      <div>
+                        <label className={labelClass}>
+                          Assign / change teacher for Batch{" "}
+                          {selectedSubjectBatch}
+                        </label>
+                        <SearchableTeacherSelect
+                          subjectId={sub._id}
+                          currentTeacherId={sub.assignedTeacher?.teacherId}
+                        />
+                      </div>
+                    )}
+
+                    {selectedSubjectBatch && sub.assignedTeacher && (
+                      <div className="rounded-lg bg-gray-50 border border-gray-100 px-4 py-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                          Other subjects for this teacher
+                        </p>
+                        {getTeacherOtherAssignments(
+                          sub.assignedTeacher.teacherId,
+                          sub._id,
+                        ).length === 0 ? (
+                          <p className="text-sm text-gray-600">
+                            No other subject assignments.
+                          </p>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {getTeacherOtherAssignments(
+                              sub.assignedTeacher.teacherId,
+                              sub._id,
+                            ).map((assignment) => (
+                              <span
+                                key={assignment.id}
+                                className={assignmentBadgeClass(
+                                  assignment.status,
+                                )}
+                              >
+                                {assignment.label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-
-                  {selectedSubjectBatch && (
-                    <div>
-                      <label className={labelClass}>
-                        Assign / change teacher for Batch {selectedSubjectBatch}
-                      </label>
-                      <SearchableTeacherSelect
-                        subjectId={sub._id}
-                        currentTeacherId={sub.assignedTeacher?.teacherId}
-                      />
-                    </div>
-                  )}
-
-                  {selectedSubjectBatch && sub.assignedTeacher && (
-                    <div className="rounded-lg bg-gray-50 border border-gray-100 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                        Other subjects for this teacher
-                      </p>
-                      {getTeacherOtherAssignments(
-                        sub.assignedTeacher.teacherId,
-                        sub._id,
-                      ).length === 0 ? (
-                        <p className="text-sm text-gray-600">
-                          No other subject assignments.
-                        </p>
-                      ) : (
-                        <div className="flex flex-wrap gap-2">
-                          {getTeacherOtherAssignments(
-                            sub.assignedTeacher.teacherId,
-                            sub._id,
-                          ).map((assignment) => (
-                            <span
-                              key={assignment.id}
-                              className={assignmentBadgeClass(assignment.status)}
-                            >
-                              {assignment.label}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
                 ))
               )}
             </div>
