@@ -316,7 +316,7 @@ export default function SubjectsTab({
               aria-label="Close teacher list"
               onClick={closeDropdown}
             />
-            <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <div className="relative z-30 mt-1 w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
               <div className="border-b border-gray-100 p-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -382,7 +382,7 @@ export default function SubjectsTab({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-lg font-bold text-gray-900">Class subjects</h2>
         <p className="mb-4 text-sm text-gray-600">

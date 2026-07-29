@@ -199,150 +199,6 @@ export const createStudent = async (req, res, next) => {
   }
 };
 
-export const importStudents = async (req, res, next) => {
-  try {
-    const rows = Array.isArray(req.body)
-      ? req.body
-      : Array.isArray(req.body?.students)
-        ? req.body.students
-        : [];
-
-    if (!rows.length) {
-      throw new ApiError(400, "Import file must contain a students array");
-    }
-
-    const created = [];
-    const skipped = [];
-    const facultyCache = new Map();
-
-    for (const [index, row] of rows.entries()) {
-      try {
-        const parsed = parseStudentBody(row);
-        const requestedFacultyCode = (
-          row?.facultyCode ||
-          row?.faculty_code ||
-          row?.admission?.facultyCode ||
-          ""
-        )
-          .trim()
-          .toUpperCase();
-        if (!parsed.facultyId && requestedFacultyCode) {
-          const facultyByCode = await Faculty.findOne({
-            faculty_code: requestedFacultyCode,
-            isDeleted: { $ne: true },
-          });
-          if (facultyByCode) {
-            parsed.facultyId = facultyByCode._id;
-            facultyCache.set(String(facultyByCode._id), facultyByCode);
-          }
-        }
-        if (
-          !parsed.std_id ||
-          !parsed.first_name ||
-          !parsed.last_name ||
-          !parsed.facultyId ||
-          !parsed.current_level ||
-          !parsed.admitted_batch ||
-          !parsed.email ||
-          !parsed.mobile_no ||
-          !parsed.gender
-        ) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id || "",
-            reason: "Required fields are missing",
-          });
-          continue;
-        }
-
-        const facultyKey = String(parsed.facultyId);
-        let faculty = facultyCache.get(facultyKey);
-        if (!faculty) {
-          faculty = await Faculty.findById(parsed.facultyId);
-          if (faculty) facultyCache.set(facultyKey, faculty);
-        }
-        if (!faculty) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id,
-            reason: "Selected faculty not found",
-          });
-          continue;
-        }
-
-        const existing = await Student.findOne({
-          $or: [
-            { std_id: parsed.std_id },
-            { email: parsed.email.toLowerCase().trim() },
-          ],
-        });
-        if (existing) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id,
-            reason: "Student ID or email already exists",
-          });
-          continue;
-        }
-
-        const baseUsername = (
-          parsed.username ||
-          `${parsed.first_name}.${parsed.last_name}`
-        )
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "");
-        let finalUsername = baseUsername || parsed.std_id.toLowerCase();
-        let suffix = 1;
-        while (await Student.findOne({ username: finalUsername })) {
-          suffix += 1;
-          finalUsername = `${baseUsername || parsed.std_id.toLowerCase()}${suffix}`;
-        }
-
-        const tempPassword =
-          parsed.password || `Tmp@${Math.random().toString(36).slice(2, 10)}`;
-        const hashedPassword = await bcrypt.hash(tempPassword, 10);
-        if (!parsed.roll_no) {
-          parsed.roll_no = await getNextRollNo(parsed.facultyId, parsed.admitted_batch);
-        }
-
-        const student = await Student.create({
-          ...parsed,
-          email: parsed.email.toLowerCase().trim(),
-          username: finalUsername,
-          password: hashedPassword,
-          plain_password: tempPassword,
-        });
-        const populatedStudent = await Student.findById(student._id).populate("facultyId");
-        const responseData = normalizeStudent(populatedStudent);
-        responseData.credentials.password = tempPassword;
-        created.push(responseData);
-      } catch (error) {
-        skipped.push({
-          row: index + 1,
-          studentId: row?.studentId || row?.std_id || "",
-          reason: error.message || "Could not import this student",
-        });
-      }
-    }
-
-    res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          created,
-          skipped,
-          createdCount: created.length,
-          skippedCount: skipped.length,
-        },
-        "Student import completed",
-      ),
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Get Students (with faculty/level filters)
 // Get Students (with faculty/level filters)
 export const getStudents = async (req, res, next) => {
@@ -400,6 +256,22 @@ export const batchUpgradeStudents = async (req, res, next) => {
 
     if (sourceLevel < 1 || sourceLevel > faculty.max_level) {
       throw new ApiError(400, "Current level is outside this faculty structure");
+    }
+
+    const latestOffering = await ClassOffering.findOne({
+      facultyId: new mongoose.Types.ObjectId(facultyId),
+      level: sourceLevel,
+      isActive: true,
+    })
+      .sort({ batch: -1 })
+      .select("batch");
+    const latestActiveBatch = Number(latestOffering?.batch || 0);
+
+    if (!latestActiveBatch || latestActiveBatch !== admittedBatch) {
+      throw new ApiError(
+        400,
+        "Only the current active batch for this semester/year can be upgraded",
+      );
     }
 
     const shouldGraduate = Boolean(markAsGraduated);
