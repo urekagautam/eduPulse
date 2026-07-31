@@ -1,24 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getNotices } from "../../services/apiNotice";
 
-const dummyNotices = [
-  {
-    _id: "1",
-    type: "text",
-    title: "Mid-Semester Exams Schedule",
-    description: "Exams from June 15th to June 22nd. Check schedule.",
-    createdAt: "2024-05-16",
-  },
-  {
-    _id: "2",
-    type: "image",
-    caption: "Annual Sports Day - June 2024",
-    imagePath: "/public/uploads/sample-notice.jpg",
-    createdAt: "2024-05-10",
-  },
-];
+const toPlainText = (value = "") =>
+  value.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
 
 export default function Notices() {
   const [expanded, setExpanded] = useState({});
+  const [notices, setNotices] = useState([]);
+
+  useEffect(() => {
+    const loadNotices = async () => {
+      try {
+        const data = await getNotices();
+        setNotices(
+          (data || []).map((notice) => ({
+            ...notice,
+            type: notice.notice_image ? "image" : "text",
+            caption: notice.image_caption || "",
+            imagePath: notice.notice_image || "",
+            description: toPlainText(notice.description),
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to load notices:", error);
+      }
+    };
+
+    loadNotices();
+  }, []);
 
   const toggle = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
@@ -34,7 +43,7 @@ export default function Notices() {
       </div>
 
       <div className="space-y-4">
-        {dummyNotices.map((n) => (
+        {notices.map((n) => (
           <div
             key={n._id}
             className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
@@ -47,7 +56,7 @@ export default function Notices() {
             {n.type === "text" ? (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {n.title}
+                  {toPlainText(n.title)}
                 </h3>
                 <p className="text-gray-700 mt-2 whitespace-pre-wrap">
                   {expanded[n._id]

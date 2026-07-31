@@ -93,18 +93,34 @@ export const changePassword = async (req, res, next) => {
     }
 
     const userId = req.user?._id;
-    if (!userId) throw new ApiError(401, "Unauthorized");
+    const authenticatedRole = req.user?.role;
+    if (!userId || !authenticatedRole) throw new ApiError(401, "Unauthorized");
 
-    // find user across possible collections
-    let user =
-      (await Admin.findById(userId)) ||
-      (await Teacher.findById(userId)) ||
-      (await Student.findById(userId));
+    // Use the same role resolved by verifyJWT. Re-scanning the three account
+    // collections in another order can select the wrong record and compare
+    // the supplied password against an unrelated hash.
+    const userModels = {
+      admin: Admin,
+      teacher: Teacher,
+      student: Student,
+    };
+    const UserModel = userModels[authenticatedRole];
+    if (!UserModel) throw new ApiError(403, "Unauthorized user role");
+
+    console.info(
+      `[auth] change-password: resolving ${authenticatedRole} account ${userId} from ${UserModel.modelName}`,
+    );
+    const user = await UserModel.findById(userId);
 
     if (!user) throw new ApiError(404, "User not found");
 
     const matches = await bcrypt.compare(currentPassword, user.password);
-    if (!matches) throw new ApiError(401, "Current password is incorrect");
+    if (!matches) {
+      console.warn(
+        `[auth] change-password: current-password verification failed for ${authenticatedRole} account ${userId}`,
+      );
+      throw new ApiError(401, "Current password is incorrect");
+    }
 
     if (await bcrypt.compare(newPassword, user.password)) {
       throw new ApiError(
@@ -115,6 +131,12 @@ export const changePassword = async (req, res, next) => {
 
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
+    // Teacher and Student cards use this existing field to display the current
+    // generated/account password to the administrator. Keep it synchronized
+    // with the login credential after a self-service password change.
+    if (["Teacher", "Student"].includes(user.constructor.modelName)) {
+      user.plain_password = newPassword;
+    }
     await user.save();
 
     res

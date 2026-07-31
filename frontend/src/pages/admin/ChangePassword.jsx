@@ -39,7 +39,7 @@ const PasswordField = ({
   </div>
 );
 
-export default function ChangePassword() {
+export default function ChangePassword({ accountLabel = "admin" }) {
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -95,7 +95,7 @@ export default function ChangePassword() {
       <div>
         <h1 className="text-xl font-bold text-gray-900">Change Password</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Update your admin account password
+          Update your {accountLabel} account password
         </p>
       </div>
 

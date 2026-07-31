@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, GraduationCap, ShieldCheck, UserRound } from "lucide-react";
+import { BookOpen, Eye, EyeOff, GraduationCap, ShieldCheck, UserRound } from "lucide-react";
 import Button from "../../components/Button";
 import { loginUser } from "../../services/apiAuth";
 import { saveSession } from "../../utils/authSession";
@@ -16,6 +16,7 @@ export default function Login() {
   const [role, setRole] = useState("admin");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +33,7 @@ export default function Login() {
         token: response.data.token,
         user: response.data.user,
       });
-      navigate(`/${userRole}/dashboard`);
+      navigate(userRole === "student" ? "/student/notices" : `/${userRole}/dashboard`);
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {
@@ -185,15 +186,25 @@ export default function Login() {
                     Password
                   </label>
 
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                    placeholder="Enter your password"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      required
+                      placeholder="Enter your password"
+                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm font-medium text-slate-950 placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (
