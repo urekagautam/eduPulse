@@ -6,6 +6,8 @@ import { batchUpgradeStudents } from "../../../services/apiBatchUpgrade";
 
 const selectClass =
   "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white";
+const readOnlyClass =
+  "w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
 
 const SEMESTER_NAMES = [
@@ -64,14 +66,6 @@ export default function BatchUpgradeTab({ faculties, onComplete }) {
   const isFinalLevel =
     selectedFaculty && fromLevel >= Number(selectedFaculty.maxLevel || 0);
 
-  const batches = useMemo(() => {
-    const values = new Set();
-    levelStudents.forEach((student) => {
-      if (student.admission?.batch) values.add(String(student.admission.batch));
-    });
-    return Array.from(values).sort((a, b) => Number(b) - Number(a));
-  }, [levelStudents]);
-
   const selectedCount = useMemo(
     () =>
       levelStudents.filter(
@@ -109,12 +103,7 @@ export default function BatchUpgradeTab({ faculties, onComplete }) {
       const sourceBatches = Array.from(
         new Set(sourceStudents.map((student) => String(student.admission?.batch))),
       ).sort((a, b) => Number(b) - Number(a));
-      setForm((current) => {
-        if (current.batch && sourceBatches.includes(String(current.batch))) {
-          return current;
-        }
-        return { ...current, batch: sourceBatches[0] || "" };
-      });
+      setForm((current) => ({ ...current, batch: sourceBatches[0] || "" }));
 
       if (selectedFaculty && Number(form.fromLevel) < Number(selectedFaculty.maxLevel)) {
         const higherResponse = await fetchStudents({
@@ -159,7 +148,8 @@ export default function BatchUpgradeTab({ faculties, onComplete }) {
     if (!form.fromLevel || !form.batch) {
       setNotice({
         type: "error",
-        message: "Please select the current level and batch.",
+        message:
+          "Please select the current level. The current active batch is auto selected.",
       });
       return;
     }
@@ -275,22 +265,18 @@ export default function BatchUpgradeTab({ faculties, onComplete }) {
           </select>
         </Field>
 
-        <Field label="Batch">
-          <select
-            className={selectClass}
-            value={form.batch}
-            onChange={(e) => updateForm({ batch: e.target.value })}
-            disabled={!form.fromLevel || loadingStudents}
-          >
-            <option value="">
-              {loadingStudents ? "Loading batches..." : "Select batch"}
-            </option>
-            {batches.map((batch) => (
-              <option key={batch} value={batch}>
-                Batch {batch}
-              </option>
-            ))}
-          </select>
+        <Field label="Current active batch">
+          <input
+            className={readOnlyClass}
+            value={
+              loadingStudents
+                ? "Loading current batch..."
+                : form.batch
+                  ? `Batch ${form.batch}`
+                  : "No active batch found"
+            }
+            readOnly
+          />
         </Field>
 
         {form.batch && (

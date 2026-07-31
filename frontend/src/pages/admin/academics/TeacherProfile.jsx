@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { X, KeyRound } from "lucide-react";
 import Button from "../../../components/Button";
+import {
+  validateEmail,
+  validateName,
+  validateNepalMobile,
+} from "../../../validations/personValidation";
 
 const inputClass =
   "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2";
+const errorClass = "mt-1 text-xs font-medium text-red-600";
 
 const emptyForm = () => ({
   firstName: "",
@@ -24,13 +30,14 @@ function generateUsername(firstName, lastName) {
   return base || `teacher${Date.now()}`;
 }
 
-const Field = ({ label, children, optional }) => (
+const Field = ({ label, children, optional, error }) => (
   <div>
     <label className={labelClass}>
       {label}
       {optional && <span className="font-normal text-gray-500"> (optional)</span>}
     </label>
     {children}
+    {error && <p className={errorClass}>{error}</p>}
   </div>
 );
 
@@ -39,10 +46,13 @@ export default function TeacherProfile({
   onClose,
   onSave,
   teacher = null,
+  students = [],
+  teachers = [],
 }) {
   const [form, setForm] = useState(emptyForm());
   const [newTeacherCreds, setNewTeacherCreds] = useState(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -61,16 +71,92 @@ export default function TeacherProfile({
       setNewTeacherCreds(null);
     }
     setError("");
+    setFieldErrors({});
   }, [teacher, isOpen]);
 
   if (!isOpen) return null;
 
+  const getInputClass = (fieldName) =>
+    `${inputClass} ${fieldErrors[fieldName] ? "border-red-400 focus:ring-red-400" : ""}`;
+
+  const updateField = (fieldName, value) => {
+    setForm((current) => ({ ...current, [fieldName]: value }));
+    if (fieldErrors[fieldName]) {
+      setFieldErrors((current) => ({ ...current, [fieldName]: "" }));
+    }
+  };
+
+  const getTeacherFieldErrors = () => ({
+    firstName: validateName(form.firstName, "First name"),
+    middleName: validateName(form.middleName, "Middle name", {
+      required: false,
+    }),
+    lastName: validateName(form.lastName, "Last name"),
+    phone: validateNepalMobile(form.phone, "Phone number"),
+    email: validateEmail(form.email),
+  });
+
+  const getDuplicateFieldErrors = () => {
+    const email = String(form.email || "").trim().toLowerCase();
+    const phone = String(form.phone || "").trim();
+    const currentTeacherId = teacher?._id;
+
+    const duplicateTeacherEmail = teachers.some(
+      (item) =>
+        item._id !== currentTeacherId &&
+        String(item.profile?.email || "").trim().toLowerCase() === email,
+    );
+    const duplicateStudentEmail = students.some(
+      (item) =>
+        String(item.profile?.email || "").trim().toLowerCase() === email,
+    );
+    const duplicateTeacherPhone = teachers.some(
+      (item) =>
+        item._id !== currentTeacherId &&
+        String(item.profile?.phone || "").trim() === phone,
+    );
+    const duplicateStudentPhone = students.some(
+      (item) => String(item.profile?.mobile || "").trim() === phone,
+    );
+
+    return {
+      email: email && (duplicateTeacherEmail || duplicateStudentEmail)
+        ? "Email already exists."
+        : "",
+      phone: phone && (duplicateTeacherPhone || duplicateStudentPhone)
+        ? "Phone number already exists."
+        : "",
+    };
+  };
+
+  const applyBackendError = (message) => {
+    if (/email already exists/i.test(message)) {
+      setFieldErrors({ email: "Email already exists." });
+      return;
+    }
+    if (/phone number already exists/i.test(message)) {
+      setFieldErrors({ phone: "Phone number already exists." });
+      return;
+    }
+    if (/mobile number|phone number/i.test(message)) {
+      setFieldErrors({ phone: "Invalid phone number." });
+      return;
+    }
+    setError(message);
+  };
+
   const handleSave = async (event) => {
     event.preventDefault();
     setError("");
-
-    if (!form.firstName || !form.lastName || !form.phone || !form.email) {
-      setError("Please fill in all required fields.");
+    const validationErrors = getTeacherFieldErrors();
+    const duplicateErrors = getDuplicateFieldErrors();
+    const nextFieldErrors = {
+      ...validationErrors,
+      email: validationErrors.email || duplicateErrors.email,
+      phone: validationErrors.phone || duplicateErrors.phone,
+    };
+    setFieldErrors(nextFieldErrors);
+    if (Object.values(nextFieldErrors).some(Boolean)) {
       return;
     }
 
@@ -97,7 +183,7 @@ export default function TeacherProfile({
       });
       onClose();
     } catch (err) {
-      setError(err?.message || "Failed to save teacher.");
+      applyBackendError(err?.message || "Failed to save teacher.");
     } finally {
       setSaving(false);
     }
@@ -125,50 +211,46 @@ export default function TeacherProfile({
           </div>
         )}
 
-        <form onSubmit={handleSave} className="space-y-8">
+        <form onSubmit={handleSave} className="space-y-8" noValidate>
           <div className="space-y-4">
             <h3 className="font-bold text-gray-800 border-b pb-2 text-lg">
               Personal Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label="First Name">
+              <Field label="First Name" error={fieldErrors.firstName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("firstName")}
                   value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  required
+                  onChange={(e) => updateField("firstName", e.target.value)}
                 />
               </Field>
-              <Field label="Middle Name" optional>
+              <Field label="Middle Name" optional error={fieldErrors.middleName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("middleName")}
                   value={form.middleName}
-                  onChange={(e) => setForm({ ...form, middleName: e.target.value })}
+                  onChange={(e) => updateField("middleName", e.target.value)}
                 />
               </Field>
-              <Field label="Last Name">
+              <Field label="Last Name" error={fieldErrors.lastName}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("lastName")}
                   value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  required
+                  onChange={(e) => updateField("lastName", e.target.value)}
                 />
               </Field>
-              <Field label="Phone No.">
+              <Field label="Phone No." error={fieldErrors.phone}>
                 <input
-                  className={inputClass}
+                  className={getInputClass("phone")}
                   value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  required
+                  onChange={(e) => updateField("phone", e.target.value)}
                 />
               </Field>
-              <Field label="Email">
+              <Field label="Email" error={fieldErrors.email}>
                 <input
                   type="email"
-                  className={inputClass}
+                  className={getInputClass("email")}
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
+                  onChange={(e) => updateField("email", e.target.value)}
                 />
               </Field>
               <div className="md:col-span-3">
@@ -177,7 +259,7 @@ export default function TeacherProfile({
                     className={`${inputClass} resize-none`}
                     rows={3}
                     value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    onChange={(e) => updateField("address", e.target.value)}
                   />
                 </Field>
               </div>

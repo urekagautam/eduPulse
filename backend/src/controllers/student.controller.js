@@ -1,10 +1,19 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { Student } from "../models/student.model.js";
+import { Teacher } from "../models/teacher.model.js";
 import { Faculty } from "../models/faculty.model.js";
 import { ClassOffering } from "../models/classOffering.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {
+  buildUsernameBase,
+  firstValidationError,
+  getUniqueUsername,
+  validateEmail,
+  validateName,
+  validateNepalMobile,
+} from "../validations/person.validation.js";
 
 // Helper to format/normalize flat Student mongoose model into nested frontend format
 const normalizeStudent = (student) => {
@@ -132,6 +141,27 @@ const getNextRollNo = async (facultyId, admitted_batch) => {
   return maxStudent && maxStudent.roll_no ? maxStudent.roll_no + 1 : 1;
 };
 
+const validateStudentFields = (parsed) =>
+  firstValidationError([
+    validateName(parsed.first_name, "First name"),
+    validateName(parsed.middle_name, "Middle name", { required: false }),
+    validateName(parsed.last_name, "Last name"),
+    validateEmail(parsed.email),
+    validateNepalMobile(parsed.mobile_no, "Mobile number"),
+    validateName(parsed.guardian_name, "Guardian name", { required: false }),
+    validateNepalMobile(parsed.guardian_mobile, "Guardian mobile", {
+      required: false,
+    }),
+    validateName(parsed.father_name, "Father's name", { required: false }),
+    validateNepalMobile(parsed.father_mobile, "Father's mobile", {
+      required: false,
+    }),
+    validateName(parsed.mother_name, "Mother's name", { required: false }),
+    validateNepalMobile(parsed.mother_mobile, "Mother's mobile", {
+      required: false,
+    }),
+  ]);
+
 // Create Student
 export const createStudent = async (req, res, next) => {
   try {
@@ -139,6 +169,11 @@ export const createStudent = async (req, res, next) => {
 
     if (!parsed.std_id || !parsed.first_name || !parsed.last_name || !parsed.facultyId || !parsed.current_level || !parsed.admitted_batch || !parsed.email || !parsed.mobile_no || !parsed.gender) {
       throw new ApiError(400, "Required fields are missing");
+    }
+
+    const validationError = validateStudentFields(parsed);
+    if (validationError) {
+      throw new ApiError(400, validationError);
     }
 
     // Check if faculty exists
@@ -153,21 +188,29 @@ export const createStudent = async (req, res, next) => {
       throw new ApiError(409, "Student ID already exists");
     }
 
-    const existingEmail = await Student.findOne({ email: parsed.email.toLowerCase() });
-    if (existingEmail) {
+    const email = parsed.email.toLowerCase().trim();
+    const mobile = parsed.mobile_no.trim();
+
+    const [existingStudentEmail, existingTeacherEmail] = await Promise.all([
+      Student.exists({ email }),
+      Teacher.exists({ email }),
+    ]);
+    if (existingStudentEmail || existingTeacherEmail) {
       throw new ApiError(409, "Email already exists");
     }
 
-    // Auto-generate username/password if not supplied
-    if (!parsed.username) {
-      parsed.username = `${parsed.first_name.toLowerCase()}.${parsed.last_name.toLowerCase()}`;
+    const [existingStudentMobile, existingTeacherMobile] = await Promise.all([
+      Student.exists({ mobile_no: mobile }),
+      Teacher.exists({ mobile_no: mobile }),
+    ]);
+    if (existingStudentMobile || existingTeacherMobile) {
+      throw new ApiError(409, "Phone number already exists");
     }
-    const finalUsername = parsed.username.trim().toLowerCase();
 
-    const existingUsername = await Student.findOne({ username: finalUsername });
-    if (existingUsername) {
-      throw new ApiError(409, "Username already exists");
-    }
+    const finalUsername = await getUniqueUsername(
+      Student,
+      parsed.username || buildUsernameBase(parsed.first_name, parsed.last_name, parsed.std_id),
+    );
 
     const tempPassword = parsed.password || `Tmp@${Math.random().toString(36).slice(2, 10)}`;
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
@@ -179,7 +222,8 @@ export const createStudent = async (req, res, next) => {
 
     const student = await Student.create({
       ...parsed,
-      email: parsed.email.toLowerCase().trim(),
+      email,
+      mobile_no: mobile,
       username: finalUsername,
       password: hashedPassword,
       plain_password: tempPassword,
@@ -194,150 +238,6 @@ export const createStudent = async (req, res, next) => {
     }
 
     res.status(201).json(new ApiResponse(201, responseData, "Student created successfully"));
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const importStudents = async (req, res, next) => {
-  try {
-    const rows = Array.isArray(req.body)
-      ? req.body
-      : Array.isArray(req.body?.students)
-        ? req.body.students
-        : [];
-
-    if (!rows.length) {
-      throw new ApiError(400, "Import file must contain a students array");
-    }
-
-    const created = [];
-    const skipped = [];
-    const facultyCache = new Map();
-
-    for (const [index, row] of rows.entries()) {
-      try {
-        const parsed = parseStudentBody(row);
-        const requestedFacultyCode = (
-          row?.facultyCode ||
-          row?.faculty_code ||
-          row?.admission?.facultyCode ||
-          ""
-        )
-          .trim()
-          .toUpperCase();
-        if (!parsed.facultyId && requestedFacultyCode) {
-          const facultyByCode = await Faculty.findOne({
-            faculty_code: requestedFacultyCode,
-            isDeleted: { $ne: true },
-          });
-          if (facultyByCode) {
-            parsed.facultyId = facultyByCode._id;
-            facultyCache.set(String(facultyByCode._id), facultyByCode);
-          }
-        }
-        if (
-          !parsed.std_id ||
-          !parsed.first_name ||
-          !parsed.last_name ||
-          !parsed.facultyId ||
-          !parsed.current_level ||
-          !parsed.admitted_batch ||
-          !parsed.email ||
-          !parsed.mobile_no ||
-          !parsed.gender
-        ) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id || "",
-            reason: "Required fields are missing",
-          });
-          continue;
-        }
-
-        const facultyKey = String(parsed.facultyId);
-        let faculty = facultyCache.get(facultyKey);
-        if (!faculty) {
-          faculty = await Faculty.findById(parsed.facultyId);
-          if (faculty) facultyCache.set(facultyKey, faculty);
-        }
-        if (!faculty) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id,
-            reason: "Selected faculty not found",
-          });
-          continue;
-        }
-
-        const existing = await Student.findOne({
-          $or: [
-            { std_id: parsed.std_id },
-            { email: parsed.email.toLowerCase().trim() },
-          ],
-        });
-        if (existing) {
-          skipped.push({
-            row: index + 1,
-            studentId: parsed.std_id,
-            reason: "Student ID or email already exists",
-          });
-          continue;
-        }
-
-        const baseUsername = (
-          parsed.username ||
-          `${parsed.first_name}.${parsed.last_name}`
-        )
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "");
-        let finalUsername = baseUsername || parsed.std_id.toLowerCase();
-        let suffix = 1;
-        while (await Student.findOne({ username: finalUsername })) {
-          suffix += 1;
-          finalUsername = `${baseUsername || parsed.std_id.toLowerCase()}${suffix}`;
-        }
-
-        const tempPassword =
-          parsed.password || `Tmp@${Math.random().toString(36).slice(2, 10)}`;
-        const hashedPassword = await bcrypt.hash(tempPassword, 10);
-        if (!parsed.roll_no) {
-          parsed.roll_no = await getNextRollNo(parsed.facultyId, parsed.admitted_batch);
-        }
-
-        const student = await Student.create({
-          ...parsed,
-          email: parsed.email.toLowerCase().trim(),
-          username: finalUsername,
-          password: hashedPassword,
-          plain_password: tempPassword,
-        });
-        const populatedStudent = await Student.findById(student._id).populate("facultyId");
-        const responseData = normalizeStudent(populatedStudent);
-        responseData.credentials.password = tempPassword;
-        created.push(responseData);
-      } catch (error) {
-        skipped.push({
-          row: index + 1,
-          studentId: row?.studentId || row?.std_id || "",
-          reason: error.message || "Could not import this student",
-        });
-      }
-    }
-
-    res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          created,
-          skipped,
-          createdCount: created.length,
-          skippedCount: skipped.length,
-        },
-        "Student import completed",
-      ),
-    );
   } catch (error) {
     next(error);
   }
@@ -400,6 +300,22 @@ export const batchUpgradeStudents = async (req, res, next) => {
 
     if (sourceLevel < 1 || sourceLevel > faculty.max_level) {
       throw new ApiError(400, "Current level is outside this faculty structure");
+    }
+
+    const latestOffering = await ClassOffering.findOne({
+      facultyId: new mongoose.Types.ObjectId(facultyId),
+      level: sourceLevel,
+      isActive: true,
+    })
+      .sort({ batch: -1 })
+      .select("batch");
+    const latestActiveBatch = Number(latestOffering?.batch || 0);
+
+    if (!latestActiveBatch || latestActiveBatch !== admittedBatch) {
+      throw new ApiError(
+        400,
+        "Only the current active batch for this semester/year can be upgraded",
+      );
     }
 
     const shouldGraduate = Boolean(markAsGraduated);
@@ -507,6 +423,43 @@ export const updateStudent = async (req, res, next) => {
 
     const parsed = parseStudentBody(req.body);
 
+    const validationError = firstValidationError([
+      parsed.first_name ? validateName(parsed.first_name, "First name") : "",
+      parsed.middle_name !== undefined
+        ? validateName(parsed.middle_name, "Middle name", { required: false })
+        : "",
+      parsed.last_name ? validateName(parsed.last_name, "Last name") : "",
+      parsed.email ? validateEmail(parsed.email) : "",
+      parsed.mobile_no ? validateNepalMobile(parsed.mobile_no, "Mobile number") : "",
+      parsed.guardian_name !== undefined
+        ? validateName(parsed.guardian_name, "Guardian name", { required: false })
+        : "",
+      parsed.guardian_mobile !== undefined
+        ? validateNepalMobile(parsed.guardian_mobile, "Guardian mobile", {
+            required: false,
+          })
+        : "",
+      parsed.father_name !== undefined
+        ? validateName(parsed.father_name, "Father's name", { required: false })
+        : "",
+      parsed.father_mobile !== undefined
+        ? validateNepalMobile(parsed.father_mobile, "Father's mobile", {
+            required: false,
+          })
+        : "",
+      parsed.mother_name !== undefined
+        ? validateName(parsed.mother_name, "Mother's name", { required: false })
+        : "",
+      parsed.mother_mobile !== undefined
+        ? validateNepalMobile(parsed.mother_mobile, "Mother's mobile", {
+            required: false,
+          })
+        : "",
+    ]);
+    if (validationError) {
+      throw new ApiError(400, validationError);
+    }
+
     // Update fields if provided
     if (parsed.std_id && parsed.std_id !== student.std_id) {
       const existing = await Student.findOne({ std_id: parsed.std_id });
@@ -514,10 +467,28 @@ export const updateStudent = async (req, res, next) => {
       student.std_id = parsed.std_id;
     }
 
-    if (parsed.email && parsed.email.toLowerCase() !== student.email) {
-      const existing = await Student.findOne({ email: parsed.email.toLowerCase() });
-      if (existing) throw new ApiError(409, "Email already exists");
-      student.email = parsed.email.toLowerCase().trim();
+    if (parsed.email && parsed.email.toLowerCase().trim() !== student.email) {
+      const email = parsed.email.toLowerCase().trim();
+      const [existingStudent, existingTeacher] = await Promise.all([
+        Student.exists({ _id: { $ne: student._id }, email }),
+        Teacher.exists({ email }),
+      ]);
+      if (existingStudent || existingTeacher) {
+        throw new ApiError(409, "Email already exists");
+      }
+      student.email = email;
+    }
+
+    if (parsed.mobile_no && parsed.mobile_no.trim() !== student.mobile_no) {
+      const mobile = parsed.mobile_no.trim();
+      const [existingStudent, existingTeacher] = await Promise.all([
+        Student.exists({ _id: { $ne: student._id }, mobile_no: mobile }),
+        Teacher.exists({ mobile_no: mobile }),
+      ]);
+      if (existingStudent || existingTeacher) {
+        throw new ApiError(409, "Phone number already exists");
+      }
+      student.mobile_no = mobile;
     }
 
     if (parsed.first_name) student.first_name = parsed.first_name;
@@ -527,7 +498,6 @@ export const updateStudent = async (req, res, next) => {
     if (parsed.current_level) student.current_level = parsed.current_level;
     if (parsed.admitted_batch) student.admitted_batch = parsed.admitted_batch;
     if (parsed.roll_no) student.roll_no = parsed.roll_no;
-    if (parsed.mobile_no) student.mobile_no = parsed.mobile_no;
     if (parsed.gender) student.gender = parsed.gender;
     if (parsed.blood_group !== undefined) student.blood_group = parsed.blood_group;
     if (parsed.citizenship_no !== undefined) student.citizenship_no = parsed.citizenship_no;

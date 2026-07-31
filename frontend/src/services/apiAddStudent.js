@@ -48,21 +48,6 @@ export const createStudent = async (studentData) => {
   return handleResponse(response);
 };
 
-export const importStudents = async (students) => {
-  const token = localStorage.getItem("examifyToken");
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
-  const response = await fetch(`${STUDENTS_API_URL}/import`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ students }),
-  });
-  return handleResponse(response);
-};
-
 export const updateStudent = async (studentId, studentData) => {
   const token = localStorage.getItem("examifyToken");
   const headers = {

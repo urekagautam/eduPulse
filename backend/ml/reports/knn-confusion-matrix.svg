@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="504" height="480" viewBox="0 0 504 480">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="252" y="28" text-anchor="middle" font-family="Segoe UI, Arial" font-size="16" font-weight="600">Confusion Matrix - KNN</text>
+<text x="300" y="52" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#475569">Predicted</text>
+<text x="20" y="240" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#475569" transform="rotate(-90 20 240)">Actual</text>
+<text x="174" y="56" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">At Risk</text>
+<text x="258" y="56" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">Average</text>
+<text x="342" y="56" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">Good</text>
+<text x="426" y="56" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">Excellent</text>
+<text x="120" y="118" text-anchor="end" font-family="Segoe UI, Arial" font-size="11">At Risk</text>
+<text x="120" y="202" text-anchor="end" font-family="Segoe UI, Arial" font-size="11">Average</text>
+<text x="120" y="286" text-anchor="end" font-family="Segoe UI, Arial" font-size="11">Good</text>
+<text x="120" y="370" text-anchor="end" font-family="Segoe UI, Arial" font-size="11">Excellent</text>
+<rect x="132" y="72" width="84" height="84" fill="rgb(213,222,255)" stroke="#cbd5e1"/>
+<text x="174" y="120" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">6</text>
+<rect x="216" y="72" width="84" height="84" fill="rgb(234,239,255)" stroke="#cbd5e1"/>
+<text x="258" y="120" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">2</text>
+<rect x="300" y="72" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="342" y="120" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="384" y="72" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="426" y="120" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="132" y="156" width="84" height="84" fill="rgb(240,244,255)" stroke="#cbd5e1"/>
+<text x="174" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">1</text>
+<rect x="216" y="156" width="84" height="84" fill="rgb(169,186,255)" stroke="#cbd5e1"/>
+<text x="258" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">14</text>
+<rect x="300" y="156" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="342" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="384" y="156" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="426" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="132" y="240" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="174" y="288" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="216" y="240" width="84" height="84" fill="rgb(240,244,255)" stroke="#cbd5e1"/>
+<text x="258" y="288" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">1</text>
+<rect x="300" y="240" width="84" height="84" fill="rgb(115,142,255)" stroke="#cbd5e1"/>
+<text x="342" y="288" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#ffffff">24</text>
+<rect x="384" y="240" width="84" height="84" fill="rgb(240,244,255)" stroke="#cbd5e1"/>
+<text x="426" y="288" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">1</text>
+<rect x="132" y="324" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="174" y="372" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="216" y="324" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
+<text x="258" y="372" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="300" y="324" width="84" height="84" fill="rgb(234,239,255)" stroke="#cbd5e1"/>
+<text x="342" y="372" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">2</text>
+<rect x="384" y="324" width="84" height="84" fill="rgb(110,138,255)" stroke="#cbd5e1"/>
+<text x="426" y="372" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#ffffff">25</text>
+</svg>

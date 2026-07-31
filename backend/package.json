@@ -8,7 +8,11 @@
     "demo:seed-ml": "node -r dotenv/config scripts/seedMlDemoData.js",
     "ml:export": "node -r dotenv/config scripts/exportPerformanceDataset.js",
     "ml:evaluate": "node -r dotenv/config scripts/evaluatePerformanceModel.js",
-    "ml:train": "node -r dotenv/config scripts/trainPerformanceModel.js"
+    "ml:evaluate-knn": "node -r dotenv/config scripts/evaluateKnnModel.js",
+    "ml:evaluate-report": "node -r dotenv/config scripts/evaluateReportMetrics.js",
+    "ml:report": "node -r dotenv/config scripts/evaluateReportMetrics.js",
+    "ml:train": "node -r dotenv/config scripts/trainPerformanceModel.js",
+    "ml:confusion": "node -r dotenv/config scripts/confusionMatrix.js"
   },
   "repository": {
     "type": "git",
