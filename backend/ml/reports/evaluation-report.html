@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Examify ML Evaluation Report</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; max-width: 960px; margin: 32px auto; padding: 0 16px; color: #111; }
+    h1, h2, h3 { margin-top: 1.6em; }
+    .note { background: #f8fafc; border-left: 4px solid #2563eb; padding: 12px 16px; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+    .metric { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #fff; }
+    .metric strong { display: block; font-size: 22px; margin-top: 4px; }
+    table.matrix { border-collapse: collapse; margin: 12px 0 24px; }
+    table.matrix th, table.matrix td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; }
+    table.matrix th { background: #f1f5f9; }
+    .chart { margin: 16px 0 32px; border: 1px solid #e5e7eb; display: inline-block; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Examify — ML Evaluation Report</h1>
+  <p>Generated: 2026-07-29T15:07:18.009Z</p>
+  <div class="note">
+    <p><strong>How this maps to a binary confusion matrix (like medical classifiers):</strong></p>
+    <p>Our models use 4 risk categories. For TP / TN / FP / FN and ROC (which need a binary positive/negative),
+    we treat <code>At Risk</code> as the <em>positive</em> class and all other categories as <em>negative</em>
+    (Not At Risk). That matches the idea of detecting students who need intervention.</p>
+    <p>Rows: 377 · Train: 301 · Test: 76 · Split: 80/20</p>
+  </div>
+
+  <h2>1. K-Nearest Neighbors (K = 7)</h2>
+  <div class="metrics">
+    <div class="metric">True Positives (TP)<strong>6</strong></div>
+    <div class="metric">True Negatives (TN)<strong>67</strong></div>
+    <div class="metric">False Positives (FP)<strong>1</strong></div>
+    <div class="metric">False Negatives (FN)<strong>2</strong></div>
+    <div class="metric">Accuracy<strong>96.05%</strong></div>
+    <div class="metric">Precision<strong>85.71%</strong></div>
+    <div class="metric">Recall<strong>75%</strong></div>
+    <div class="metric">F1 Score<strong>80%</strong></div>
+    <div class="metric">AUC<strong>0.9853</strong></div>
+  </div>
+
+  <h3>4-class confusion matrix (KNN)</h3>
+  <table class="matrix"><thead><tr><th>Actual \ Predicted</th><th>At Risk</th><th>Average</th><th>Good</th><th>Excellent</th></tr></thead><tbody><tr><th>At Risk</th><td>6</td><td>2</td><td>0</td><td>0</td></tr><tr><th>Average</th><td>1</td><td>14</td><td>0</td><td>0</td></tr><tr><th>Good</th><td>0</td><td>1</td><td>24</td><td>1</td></tr><tr><th>Excellent</th><td>0</td><td>0</td><td>2</td><td>25</td></tr></tbody></table>
+  <p>Raw array: <code>[[6,2,0,0],[1,14,0,0],[0,1,24,1],[0,0,2,25]]</code></p>
+
+  <h3>Binary confusion matrix — At Risk vs Not At Risk (KNN)</h3>
+  <table class="matrix"><thead><tr><th>Actual \ Predicted</th><th>Not At Risk (0)</th><th>At Risk (1)</th></tr></thead><tbody><tr><th>Not At Risk (0)</th><td>67</td><td>1</td></tr><tr><th>At Risk (1)</th><td>2</td><td>6</td></tr></tbody></table>
+  <p>Raw array [[TN, FP], [FN, TP]]: <code>[[67,1],[2,6]]</code></p>
+
+  <h3>ROC Curve — At Risk detection (KNN)</h3>
+  <div class="chart"><svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+  <rect width="100%" height="100%" fill="#fff"/>
+  <text x="240" y="22" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="600">ROC Curve for At-Risk Classification (KNN)</text>
+  <line x1="48" y1="48" x2="48" y2="312" stroke="#333"/>
+  <line x1="48" y1="312" x2="432" y2="312" stroke="#333"/>
+  <line x1="48" y1="312" x2="432" y2="48" stroke="#999" stroke-dasharray="4 4"/>
+  <path d="M48.0,312.0 L48.0,279.0 L53.6,246.0 L53.6,114.0 L59.3,81.0 L59.3,48.0 L70.6,48.0 L432.0,48.0 L432.0,48.0" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="240" y="350" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">False Positive Rate</text>
+  <text x="16" y="180" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" transform="rotate(-90 16 180)">True Positive Rate</text>
+  <text x="424" y="66" text-anchor="end" font-family="Segoe UI, Arial" font-size="12" fill="#2563eb">AUC = 0.9853</text>
+</svg></div>
+
+  <h2>2. Random Forest Regressor (category evaluation)</h2>
+  <div class="metrics">
+    <div class="metric">MAE<strong>2.26 pp</strong></div>
+    <div class="metric">RMSE<strong>4.36 pp</strong></div>
+    <div class="metric">True Positives (TP)<strong>7</strong></div>
+    <div class="metric">True Negatives (TN)<strong>68</strong></div>
+    <div class="metric">False Positives (FP)<strong>0</strong></div>
+    <div class="metric">False Negatives (FN)<strong>1</strong></div>
+    <div class="metric">Accuracy<strong>98.68%</strong></div>
+    <div class="metric">Precision<strong>100%</strong></div>
+    <div class="metric">Recall<strong>87.5%</strong></div>
+    <div class="metric">F1 Score<strong>93.33%</strong></div>
+    <div class="metric">AUC<strong>0.9963</strong></div>
+  </div>
+
+  <h3>4-class confusion matrix (Random Forest)</h3>
+  <table class="matrix"><thead><tr><th>Actual \ Predicted</th><th>At Risk</th><th>Average</th><th>Good</th><th>Excellent</th></tr></thead><tbody><tr><th>At Risk</th><td>7</td><td>1</td><td>0</td><td>0</td></tr><tr><th>Average</th><td>0</td><td>15</td><td>0</td><td>0</td></tr><tr><th>Good</th><td>0</td><td>2</td><td>24</td><td>0</td></tr><tr><th>Excellent</th><td>0</td><td>0</td><td>1</td><td>26</td></tr></tbody></table>
+  <p>Raw array: <code>[[7,1,0,0],[0,15,0,0],[0,2,24,0],[0,0,1,26]]</code></p>
+
+  <h3>Binary confusion matrix — At Risk vs Not At Risk (Random Forest)</h3>
+  <table class="matrix"><thead><tr><th>Actual \ Predicted</th><th>Not At Risk (0)</th><th>At Risk (1)</th></tr></thead><tbody><tr><th>Not At Risk (0)</th><td>68</td><td>0</td></tr><tr><th>At Risk (1)</th><td>1</td><td>7</td></tr></tbody></table>
+  <p>Raw array [[TN, FP], [FN, TP]]: <code>[[68,0],[1,7]]</code></p>
+
+  <h3>ROC Curve — At Risk detection (Random Forest)</h3>
+  <div class="chart"><svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+  <rect width="100%" height="100%" fill="#fff"/>
+  <text x="240" y="22" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="600">ROC Curve for At-Risk Classification (Random Forest)</text>
+  <line x1="48" y1="48" x2="48" y2="312" stroke="#333"/>
+  <line x1="48" y1="312" x2="432" y2="312" stroke="#333"/>
+  <line x1="48" y1="312" x2="432" y2="48" stroke="#999" stroke-dasharray="4 4"/>
+  <path d="M48.0,312.0 L48.0,279.0 L48.0,246.0 L48.0,213.0 L48.0,180.0 L48.0,147.0 L48.0,114.0 L48.0,81.0 L53.6,81.0 L59.3,81.0 L59.3,48.0 L64.9,48.0 L70.6,48.0 L76.2,48.0 L81.9,48.0 L87.5,48.0 L93.2,48.0 L98.8,48.0 L104.5,48.0 L110.1,48.0 L115.8,48.0 L121.4,48.0 L127.1,48.0 L132.7,48.0 L138.4,48.0 L144.0,48.0 L149.6,48.0 L155.3,48.0 L166.6,48.0 L172.2,48.0 L177.9,48.0 L183.5,48.0 L189.2,48.0 L194.8,48.0 L200.5,48.0 L206.1,48.0 L211.8,48.0 L217.4,48.0 L223.1,48.0 L228.7,48.0 L234.4,48.0 L245.6,48.0 L251.3,48.0 L256.9,48.0 L262.6,48.0 L268.2,48.0 L273.9,48.0 L279.5,48.0 L285.2,48.0 L290.8,48.0 L296.5,48.0 L302.1,48.0 L307.8,48.0 L313.4,48.0 L319.1,48.0 L324.7,48.0 L330.4,48.0 L336.0,48.0 L341.6,48.0 L347.3,48.0 L352.9,48.0 L358.6,48.0 L364.2,48.0 L369.9,48.0 L375.5,48.0 L381.2,48.0 L392.5,48.0 L398.1,48.0 L403.8,48.0 L409.4,48.0 L415.1,48.0 L420.7,48.0 L432.0,48.0 L432.0,48.0" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="240" y="350" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11">False Positive Rate</text>
+  <text x="16" y="180" text-anchor="middle" font-family="Segoe UI, Arial" font-size="11" transform="rotate(-90 16 180)">True Positive Rate</text>
+  <text x="424" y="66" text-anchor="end" font-family="Segoe UI, Arial" font-size="12" fill="#2563eb">AUC = 0.9963</text>
+</svg></div>
+
+  <h2>Definitions (for your report)</h2>
+  <ul>
+    <li><strong>TP</strong> — Actually At Risk, predicted At Risk</li>
+    <li><strong>TN</strong> — Actually Not At Risk, predicted Not At Risk</li>
+    <li><strong>FP</strong> — Actually Not At Risk, but predicted At Risk (false alarm)</li>
+    <li><strong>FN</strong> — Actually At Risk, but predicted Not At Risk (missed student)</li>
+    <li><strong>AUC</strong> — Area under ROC curve (1.0 = perfect, 0.5 = random)</li>
+  </ul>
+</body>
+</html>
