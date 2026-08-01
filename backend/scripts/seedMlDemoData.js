@@ -185,6 +185,7 @@ const ensureTeacher = async (facultyCode, subjectCode, subjectName, hash) => {
       $or: [
         { email: `${username}@college.edu.np` },
         { email: legacyEmail },
+        { username },
       ],
     },
     {
@@ -192,12 +193,15 @@ const ensureTeacher = async (facultyCode, subjectCode, subjectName, hash) => {
         first_name: firstName,
         middle_name: middleName,
         last_name: lastName,
-        mobile_no: `9801${String(100000 + teacherIndex).slice(-6)}`,
+        email: `${username}@college.edu.np`,
         address: "Kathmandu, Nepal",
         username,
         password: hash,
         plain_password: password,
         isActive: true,
+      },
+      $setOnInsert: {
+        mobile_no: `9801${String(100000 + teacherIndex).slice(-6)}`,
       },
     },
     { upsert: true, new: true, setDefaultsOnInsert: true },

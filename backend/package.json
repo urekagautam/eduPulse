@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
     "demo:seed-ml": "node -r dotenv/config scripts/seedMlDemoData.js",
+    "demo:add-final-variation": "node -r dotenv/config scripts/addRealisticFinalExamVariation.js",
     "demo:rename-ml-identities": "node -r dotenv/config scripts/renameMlDemoIdentities.js",
     "ml:export": "node -r dotenv/config scripts/exportPerformanceDataset.js",
     "ml:evaluate": "node -r dotenv/config scripts/evaluatePerformanceModel.js",
