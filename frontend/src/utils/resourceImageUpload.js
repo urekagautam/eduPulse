@@ -6,11 +6,13 @@ const API_BASE_URL =
 export async function uploadResourceImages(files, onUploadProgress) {
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
+  const token = localStorage.getItem("examifyToken");
 
   const res = await axios.post(
     `${API_BASE_URL}/api/resources/upload`,
     formData,
     {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       onUploadProgress: (progressEvent) => {
         if (onUploadProgress) {
           const percentage = Math.round(

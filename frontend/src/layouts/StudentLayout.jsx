@@ -4,21 +4,21 @@ import {
   Menu,
   X,
   LogOut,
-  LayoutDashboard,
   Megaphone,
   BookOpen,
   ClipboardList,
   FileQuestion,
+  KeyRound,
 } from "lucide-react";
 import { clearSession } from "../utils/authSession";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/student/dashboard" },
   { icon: Megaphone, label: "Notices", path: "/student/notices" },
   { icon: BookOpen, label: "Academics", path: "/student/academics" },
   { icon: FileQuestion, label: "Online Quiz", path: "/student/quizzes" },
   { icon: ClipboardList, label: "Attendance", path: "/student/attendance" },
   { icon: BookOpen, label: "Resources", path: "/student/resources" },
+  { icon: KeyRound, label: "Change Password", path: "/student/change-password" },
 ];
 
 export default function StudentLayout() {

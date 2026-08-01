@@ -2,9 +2,11 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Plus, Trash2, Edit2, Search, X, ArrowLeft } from "lucide-react";
 import Button from "../../components/Button";
 import ImageUploadField from "../../components/ImageUploadField";
+import { ResourceCard } from "../../components/resources/ResourceDisplay";
 import { uploadResourceImages } from "../../utils/resourceImageUpload";
 import {
   getResources,
+  getTeacherResourceAssignments,
   createResource,
   updateResource,
   deleteResource,
@@ -28,23 +30,6 @@ const SEMESTER_NAMES = [
 ];
 const YEAR_NAMES = ["First", "Second", "Third", "Fourth", "Fifth"];
 
-const dummyFaculties = [
-  {
-    _id: "fac_bca",
-    code: "BCA",
-    name: "Bachelor of Computer Applications",
-    structureType: "semester",
-    maxLevel: 8,
-  },
-  {
-    _id: "fac_bbs",
-    code: "BBS",
-    name: "Bachelor of Business Studies",
-    structureType: "year",
-    maxLevel: 4,
-  },
-];
-
 function getLevelLabel(structureType, level) {
   const names = structureType === "semester" ? SEMESTER_NAMES : YEAR_NAMES;
   const name = names[level - 1] || `Level ${level}`;
@@ -59,6 +44,8 @@ export default function Resources() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedFacultyId, setSelectedFacultyId] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
+  const [assignedSubjects, setAssignedSubjects] = useState([]);
 
   const [resources, setResources] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -84,16 +71,40 @@ export default function Resources() {
   const [selectedImage, setSelectedImage] = useState(null);
   const descriptionRef = useRef(null);
 
-  const faculty = dummyFaculties.find((f) => f._id === selectedFacultyId);
+  const faculties = useMemo(() => {
+    const seen = new Set();
+    return assignedSubjects
+      .filter((assignment) => {
+        if (seen.has(assignment.facultyId)) return false;
+        seen.add(assignment.facultyId);
+        return true;
+      })
+      .map((assignment) => ({ ...assignment, code: assignment.facultyCode }));
+  }, [assignedSubjects]);
+
+  const faculty = faculties.find((item) => item.facultyId === selectedFacultyId);
 
   const levelOptions = useMemo(() => {
-    if (!faculty) return [];
-    const max = faculty.maxLevel;
-    return Array.from({ length: max }, (_, i) => ({
-      value: i + 1,
-      label: getLevelLabel(faculty.structureType, i + 1),
-    }));
-  }, [faculty]);
+    const levels = assignedSubjects
+      .filter((assignment) => assignment.facultyId === selectedFacultyId)
+      .map((assignment) => assignment.level);
+    return [...new Set(levels)]
+      .sort((a, b) => a - b)
+      .map((value) => ({
+        value,
+        label: getLevelLabel(faculty?.structureType, value),
+      }));
+  }, [assignedSubjects, faculty?.structureType, selectedFacultyId]);
+
+  const subjectOptions = useMemo(
+    () =>
+      assignedSubjects.filter(
+        (assignment) =>
+          assignment.facultyId === selectedFacultyId &&
+          assignment.level === Number(selectedLevel),
+      ),
+    [assignedSubjects, selectedFacultyId, selectedLevel],
+  );
 
   const isBlobUrl = (url) => typeof url === "string" && url.startsWith("blob:");
 
@@ -163,10 +174,14 @@ export default function Resources() {
 
     const loadResources = async () => {
       try {
-        const data = await getResources();
+        const [data, assignments] = await Promise.all([
+          getResources(),
+          getTeacherResourceAssignments(),
+        ]);
         logDebug("Fetched resources", data);
         if (isMounted) {
           setResources(normalizeResources(data));
+          setAssignedSubjects(assignments || []);
         }
       } catch (err) {
         console.error("Failed to load resources:", err);
@@ -232,6 +247,7 @@ export default function Resources() {
     setShowAddModal(false);
     setSelectedFacultyId("");
     setSelectedLevel("");
+    setSelectedSubjectId("");
     resetForm();
   };
 
@@ -241,7 +257,7 @@ export default function Resources() {
   };
 
   const handleStartCreate = () => {
-    if (!selectedFacultyId || !selectedLevel) return;
+    if (!selectedFacultyId || !selectedLevel || !selectedSubjectId) return;
     setShowAddModal(false);
     // editor is visible because faculty+level remain selected
     resetForm();
@@ -274,8 +290,14 @@ export default function Resources() {
   };
 
   const handleSave = async () => {
-    if (!selectedFacultyId || !selectedLevel) return;
-    if (resourceType === "text" && !stripHtml(description).trim()) return;
+    if (!selectedFacultyId || !selectedLevel || !selectedSubjectId) return;
+    if (
+      resourceType === "text" &&
+      (!title.trim() || !stripHtml(description).trim())
+    ) {
+      setImageUploadError("Text resources require both a title and description");
+      return;
+    }
 
     let imageMetadata = [];
     try {
@@ -356,9 +378,10 @@ export default function Resources() {
       const payload = {
         facultyId: selectedFacultyId,
         level: Number(selectedLevel),
+        subjectId: selectedSubjectId,
         type: resourceType,
-        title: (title && title.trim()) || "",
-        description: description || "",
+        title: resourceType === "text" ? title.trim() : "",
+        description: resourceType === "text" ? description : "",
         imageMetadata,
       };
 
@@ -384,6 +407,7 @@ export default function Resources() {
     setViewingResource(null);
     setSelectedFacultyId(res.facultyId);
     setSelectedLevel(String(res.level));
+    setSelectedSubjectId(res.subjectId?._id || res.subjectId || "");
     setEditingId(res._id);
     setResourceType(res.type);
     setTitle(res.title || "");
@@ -477,23 +501,27 @@ export default function Resources() {
         </div>
       </div>
 
-      {/* Modal: select faculty/level */}
+      {/* Modal: choose from this teacher's assigned subjects */}
       {showAddModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
           <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-bold">Choose faculty & level</h3>
+            <h3 className="text-lg font-bold">Choose faculty, level & subject</h3>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className={labelClass}>Faculty</label>
                 <select
                   className={selectClass}
                   value={selectedFacultyId}
-                  onChange={(e) => setSelectedFacultyId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedFacultyId(e.target.value);
+                    setSelectedLevel("");
+                    setSelectedSubjectId("");
+                  }}
                 >
                   <option value="">Select faculty</option>
-                  {dummyFaculties.map((f) => (
-                    <option key={f._id} value={f._id}>
-                      {f.code} — {f.name}
+                  {faculties.map((f) => (
+                    <option key={f.facultyId} value={f.facultyId}>
+                      {f.facultyCode} — {f.facultyName}
                     </option>
                   ))}
                 </select>
@@ -503,13 +531,34 @@ export default function Resources() {
                 <select
                   className={selectClass}
                   value={selectedLevel}
-                  onChange={(e) => setSelectedLevel(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedLevel(e.target.value);
+                    setSelectedSubjectId("");
+                  }}
                   disabled={!selectedFacultyId}
                 >
                   <option value="">Select level</option>
                   {levelOptions.map((l) => (
                     <option key={l.value} value={l.value}>
                       {l.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Subject</label>
+                <select
+                  className={selectClass}
+                  value={selectedSubjectId}
+                  onChange={(e) => setSelectedSubjectId(e.target.value)}
+                  disabled={!selectedLevel}
+                >
+                  <option value="">Select subject</option>
+                  {subjectOptions.map((subject) => (
+                    <option key={subject.subjectId} value={subject.subjectId}>
+                      {subject.subjectCode
+                        ? `${subject.subjectCode} — ${subject.subjectName}`
+                        : subject.subjectName}
                     </option>
                   ))}
                 </select>
@@ -527,14 +576,24 @@ export default function Resources() {
         </div>
       )}
 
-      {/* Editor area (shown when faculty+level selected or editing) */}
-      {selectedFacultyId && selectedLevel && (
+      {/* Editor area (shown after an assigned subject is selected) */}
+      {selectedFacultyId && selectedLevel && selectedSubjectId && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">
                 Faculty: <strong>{faculty?.code}</strong> ·{" "}
                 {getLevelLabel(faculty?.structureType, Number(selectedLevel))}
+              </p>
+              <p className="text-sm text-gray-500">
+                Subject:{" "}
+                <strong>
+                  {
+                    subjectOptions.find(
+                      (subject) => subject.subjectId === selectedSubjectId,
+                    )?.subjectName
+                  }
+                </strong>
               </p>
               <p className="text-xs text-gray-400">
                 Create a text note or upload multiple images with titles and
@@ -556,62 +615,69 @@ export default function Resources() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setResourceType("images")}
+                  onClick={() => {
+                    setResourceType("images");
+                    setTitle("");
+                    setDescription("");
+                    if (descriptionRef.current) descriptionRef.current.innerHTML = "";
+                  }}
                   className={`rounded-2xl px-4 py-2 text-sm font-semibold ${resourceType === "images" ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                 >
                   Image(s)
                 </button>
               </div>
-              <div className="mt-4 space-y-3">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    className={inputClass}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => applyFormatting("bold")}
-                      className={`px-4 py-2 rounded-2xl text-sm font-semibold transition-colors ${
-                        textFormatting.isBold
-                          ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      B
-                    </button>
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => applyFormatting("underline")}
-                      className={`px-4 py-2 rounded-2xl underline text-sm font-semibold transition-colors ${
-                        textFormatting.isUnderline
-                          ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      U
-                    </button>
+              {resourceType === "text" && (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <label className={labelClass}>Title</label>
+                    <input
+                      className={inputClass}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
                   </div>
-                  <div
-                    ref={descriptionRef}
-                    contentEditable
-                    suppressContentEditableWarning
-                    dir="ltr"
-                    className="w-full rounded-2xl border border-gray-300 px-4 py-3 min-h-30 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] whitespace-pre-wrap wrap-break-word text-left"
-                    style={{ textAlign: "left" }}
-                    onInput={(e) => setDescription(e.currentTarget.innerHTML)}
-                    onKeyUp={updateTextFormattingState}
-                    onMouseUp={updateTextFormattingState}
-                  />
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => applyFormatting("bold")}
+                        className={`px-4 py-2 rounded-2xl text-sm font-semibold transition-colors ${
+                          textFormatting.isBold
+                            ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        B
+                      </button>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => applyFormatting("underline")}
+                        className={`px-4 py-2 rounded-2xl underline text-sm font-semibold transition-colors ${
+                          textFormatting.isUnderline
+                            ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        U
+                      </button>
+                    </div>
+                    <div
+                      ref={descriptionRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      dir="ltr"
+                      className="w-full rounded-2xl border border-gray-300 px-4 py-3 min-h-30 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] whitespace-pre-wrap wrap-break-word text-left"
+                      style={{ textAlign: "left" }}
+                      onInput={(e) => setDescription(e.currentTarget.innerHTML)}
+                      onKeyUp={updateTextFormattingState}
+                      onMouseUp={updateTextFormattingState}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {resourceType === "images" && (
                 <div className="mt-4 space-y-4">
@@ -624,9 +690,9 @@ export default function Resources() {
                     error={imageUploadError}
                   />
 
-                  {/* Image Title */}
-                  <div>
-                    <label className={labelClass}>
+                    {/* Image Title */}
+                    <div>
+                      <label className={labelClass}>
                       Image Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -782,23 +848,11 @@ export default function Resources() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               {filtered.map((r) => (
-                <div
+                <ResourceCard
                   key={r._id}
-                  onClick={() => setViewingResource(r)}
-                  className="cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-semibold text-gray-900 truncate">
-                        {r.title ||
-                          (r.type === "images"
-                            ? r.images?.[0]?.title || "Untitled image resource"
-                            : "(untitled)")}
-                      </p>
-                      <p className="mt-1 text-xs text-gray-500">
-                        {new Date(r.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
+                  resource={r}
+                  onView={setViewingResource}
+                  action={
                     <div className="flex items-center gap-2">
                       <button
                         onClick={(e) => {
@@ -819,25 +873,8 @@ export default function Resources() {
                         <Trash2 />
                       </button>
                     </div>
-                  </div>
-
-                  {r.images && r.images.length > 0 && (
-                    <div className="mb-3 overflow-hidden rounded-xl bg-gray-50">
-                      <img
-                        src={r.images[0].url}
-                        alt={r.images[0].title || r.images[0].name}
-                        className="h-40 w-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {r.description && (
-                    <div
-                      className="mt-3 text-sm text-gray-700 line-clamp-3"
-                      dangerouslySetInnerHTML={{ __html: r.description }}
-                    />
-                  )}
-                </div>
+                  }
+                />
               ))}
             </div>
           )}
@@ -936,11 +973,11 @@ export default function Resources() {
             >
               <X className="h-5 w-5" />
             </button>
-            <div className="overflow-hidden rounded-3xl bg-white shadow-xl">
+            <div className="max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white shadow-xl">
               <img
                 src={selectedImage.url}
                 alt={selectedImage.title || selectedImage.name}
-                className="w-full object-contain"
+                className="mx-auto block h-auto w-auto max-h-[calc(100vh-8rem)] max-w-full object-contain"
               />
               <div className="p-4">
                 <p className="text-lg font-semibold text-gray-900">

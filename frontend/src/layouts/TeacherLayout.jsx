@@ -9,6 +9,7 @@ import {
   TrendingUp,
   BookOpen,
   FileQuestion,
+  KeyRound,
 } from "lucide-react";
 import { clearSession, getStoredUser } from "../utils/authSession";
 
@@ -18,6 +19,7 @@ const menuItems = [
   { icon: TrendingUp, label: "Marks", path: "/teacher/marks" },
   { icon: FileQuestion, label: "Quizzes", path: "/teacher/quizzes" },
   { icon: BookOpen, label: "Resources", path: "/teacher/resources" },
+  { icon: KeyRound, label: "Change Password", path: "/teacher/change-password" },
 ];
 
 export default function TeacherLayout() {

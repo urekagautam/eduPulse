@@ -8,8 +8,9 @@ import { v2 as cloudinary } from "cloudinary";
 const getNotices = asyncHandler(async (req, res) => {
   const { isActive } = req.query;
 
-  const query = {};
-  if (isActive !== undefined) {
+  // Published notices are the only notices visible to students.
+  const query = req.user?.role === "student" ? { isActive: true } : {};
+  if (req.user?.role !== "student" && isActive !== undefined) {
     query.isActive = isActive === "true";
   }
 
@@ -30,6 +31,10 @@ const getNoticeById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Notice not found");
   }
 
+  if (req.user?.role === "student" && !notice.isActive) {
+    throw new ApiError(404, "Notice not found");
+  }
+
   res
     .status(200)
     .json(new ApiResponse(200, notice, "Notice retrieved successfully"));
@@ -37,6 +42,9 @@ const getNoticeById = asyncHandler(async (req, res) => {
 
 // Create a new notice
 const createNotice = asyncHandler(async (req, res) => {
+  console.info(
+    `[notice] POST /api/notices reached by ${req.user?._id} (${req.user?.role})`,
+  );
   const {
     title,
     description,

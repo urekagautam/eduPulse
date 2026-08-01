@@ -20,7 +20,6 @@ import TeacherAttendance from "./teacher/Attendance";
 import TeacherMarks from "./teacher/Marks";
 import TeacherQuizzes from "./teacher/Quizzes";
 import TeacherResources from "./teacher/Resources";
-import StudentDashboard from "./student/Dashboard";
 import StudentNotices from "./student/Notices";
 import StudentAcademics from "./student/Academics";
 import StudentAttendance from "./student/Attendance";
@@ -76,6 +75,10 @@ function App() {
           <Route path="marks" element={<TeacherMarks />} />
           <Route path="quizzes" element={<TeacherQuizzes />} />
           <Route path="resources" element={<TeacherResources />} />
+          <Route
+            path="change-password"
+            element={<ChangePassword accountLabel="teacher" />}
+          />
         </Route>
         <Route
           path="/student"
@@ -85,13 +88,16 @@ function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<StudentDashboard />} />
+          <Route index element={<Navigate to="notices" replace />} />
           <Route path="notices" element={<StudentNotices />} />
           <Route path="academics" element={<StudentAcademics />} />
           <Route path="attendance" element={<StudentAttendance />} />
           <Route path="quizzes" element={<StudentQuizzes />} />
           <Route path="resources" element={<StudentResources />} />
+          <Route
+            path="change-password"
+            element={<ChangePassword accountLabel="student" />}
+          />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
