@@ -1,63 +1,63 @@
 Examify ML Evaluation Report
-Generated: 2026-07-30T05:19:53.552Z
-Rows: 377
-Train rows: 301
-Test rows: 76
+Generated: 2026-08-01T22:31:02.325Z
+Rows: 622
+Train rows: 497
+Test rows: 125
 
 Binary evaluation rule:
 Positive class = At Risk
 Negative class = Average + Good + Excellent
 
 Random Forest Regression Model
-Accuracy: 98.68%
-Precision: 100%
-Recall: 87.5%
-F1 Score: 93.33%
-MAE: 2.26 percentage points
-RMSE: 4.36 percentage points
-AUC: 0.9963
-TP: 7
-TN: 68
-FP: 0
-FN: 1
+Accuracy: 97.6%
+Precision: 92.31%
+Recall: 85.71%
+F1 Score: 88.89%
+MAE: 2.36 percentage points
+RMSE: 4.09 percentage points
+AUC: 0.9833
+TP: 12
+TN: 110
+FP: 1
+FN: 2
 
 Classification Report for Random Forest Model:
 Class             Precision  Recall  F1-score  Support
 --------------------------------------------------------
-At Risk               1.00    0.88      0.93        8
-Average               0.83    1.00      0.91       15
-Good                  0.96    0.92      0.94       26
-Excellent             1.00    0.96      0.98       27
+At Risk               0.92    0.86      0.89       14
+Average               0.83    0.92      0.87       26
+Good                  0.98    0.93      0.96       46
+Excellent             1.00    1.00      1.00       39
 --------------------------------------------------------
-accuracy                                0.95       76
-macro avg             0.95    0.94      0.94       76
-weighted avg          0.95    0.95      0.95       76
+accuracy                                0.94      125
+macro avg             0.93    0.93      0.93      125
+weighted avg          0.95    0.94      0.94      125
 
 K-Nearest Neighbors Classification Model
-Accuracy: 96.05%
-Precision: 85.71%
-Recall: 75%
-F1 Score: 80%
-AUC: 0.9853
-TP: 6
-TN: 67
-FP: 1
+Accuracy: 96%
+Precision: 80%
+Recall: 85.71%
+F1 Score: 82.76%
+AUC: 0.9852
+TP: 12
+TN: 108
+FP: 3
 FN: 2
 
 Classification Report for KNN Model:
 Class             Precision  Recall  F1-score  Support
 --------------------------------------------------------
-At Risk               0.86    0.75      0.80        8
-Average               0.82    0.93      0.87       15
-Good                  0.92    0.92      0.92       26
-Excellent             0.96    0.93      0.94       27
+At Risk               0.80    0.86      0.83       14
+Average               0.77    0.77      0.77       26
+Good                  0.84    0.80      0.82       46
+Excellent             0.88    0.90      0.89       39
 --------------------------------------------------------
-accuracy                                0.91       76
-macro avg             0.89    0.88      0.89       76
-weighted avg          0.91    0.91      0.91       76
+accuracy                                0.83      125
+macro avg             0.82    0.83      0.83      125
+weighted avg          0.83    0.83      0.83      125
 
-JSON report: N:\8THHH SEMM\PROJECT\EXAMIFY\eigth_sem\backend\ml\reports\ml-evaluation-report.json
-Random Forest confusion matrix: N:\8THHH SEMM\PROJECT\EXAMIFY\eigth_sem\backend\ml\reports\random-forest-confusion-matrix.svg
-Random Forest ROC curve: N:\8THHH SEMM\PROJECT\EXAMIFY\eigth_sem\backend\ml\reports\random-forest-roc-curve.svg
-KNN confusion matrix: N:\8THHH SEMM\PROJECT\EXAMIFY\eigth_sem\backend\ml\reports\knn-confusion-matrix.svg
-KNN ROC curve: N:\8THHH SEMM\PROJECT\EXAMIFY\eigth_sem\backend\ml\reports\knn-roc-curve.svg
+JSON report: D:\eigth_sem\backend\ml\reports\ml-evaluation-report.json
+Random Forest confusion matrix: D:\eigth_sem\backend\ml\reports\random-forest-confusion-matrix.svg
+Random Forest ROC curve: D:\eigth_sem\backend\ml\reports\random-forest-roc-curve.svg
+KNN confusion matrix: D:\eigth_sem\backend\ml\reports\knn-confusion-matrix.svg
+KNN ROC curve: D:\eigth_sem\backend\ml\reports\knn-roc-curve.svg

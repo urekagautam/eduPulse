@@ -1,4 +1,4 @@
-import { buildPerformanceClusters } from "../ml/performanceClustering.js";
+import { buildPredictionDashboard } from "../ml/performancePredictionDashboard.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -12,7 +12,7 @@ const ensureRole = (req, role) => {
 export const getAdminDashboard = async (req, res, next) => {
   try {
     ensureRole(req, "admin");
-    const clusters = await buildPerformanceClusters({
+    const dashboard = await buildPredictionDashboard({
       scope: "admin",
       facultyId: req.query.facultyId || "",
       level: req.query.level || "",
@@ -22,7 +22,7 @@ export const getAdminDashboard = async (req, res, next) => {
     res.status(200).json(
       new ApiResponse(
         200,
-        clusters,
+        dashboard,
         "Admin dashboard analytics retrieved successfully",
       ),
     );
@@ -34,7 +34,7 @@ export const getAdminDashboard = async (req, res, next) => {
 export const getTeacherDashboard = async (req, res, next) => {
   try {
     const teacherId = ensureRole(req, "teacher");
-    const clusters = await buildPerformanceClusters({
+    const dashboard = await buildPredictionDashboard({
       scope: "teacher",
       teacherId,
       facultyId: req.query.facultyId || "",
@@ -45,7 +45,7 @@ export const getTeacherDashboard = async (req, res, next) => {
     res.status(200).json(
       new ApiResponse(
         200,
-        clusters,
+        dashboard,
         "Teacher dashboard analytics retrieved successfully",
       ),
     );

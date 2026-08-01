@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
-  BrainCircuit,
   BookOpenCheck,
+  GraduationCap,
   RefreshCw,
   Search,
   Users,
@@ -66,8 +66,8 @@ export default function Dashboard() {
 
   const atRiskCount =
     dashboard?.clusters?.find((cluster) => cluster.label === "At Risk")?.count || 0;
-  const needsAttentionCount =
-    dashboard?.clusters?.find((cluster) => cluster.label === "Needs Attention")?.count || 0;
+  const averageCount =
+    dashboard?.clusters?.find((cluster) => cluster.label === "Average")?.count || 0;
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -105,12 +105,12 @@ export default function Dashboard() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Teacher Dashboard</h1>
           <p className="mt-1 text-gray-600">
-            Current class overview for students in your assigned subjects.
+            Final-score predictions and KNN student categories for your assigned classes.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-primary-border)] bg-[var(--color-primary-bg)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-strong)]">
-          <BrainCircuit className="h-4 w-4" />
-          Student grouping
+          <GraduationCap className="h-4 w-4" />
+          EduPulse
         </div>
       </div>
 
@@ -167,8 +167,8 @@ export default function Dashboard() {
             </div>
             <div className={cardClass}>
               <BookOpenCheck className="mb-3 h-5 w-5 text-yellow-600" />
-              <p className="text-sm text-gray-500">Needs attention</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{needsAttentionCount}</p>
+              <p className="text-sm text-gray-500">Average</p>
+              <p className="mt-1 text-3xl font-bold text-gray-900">{averageCount}</p>
             </div>
             <div className={cardClass}>
               <BarChart3 className="mb-3 h-5 w-5 text-green-600" />
@@ -211,12 +211,12 @@ export default function Dashboard() {
                 </p>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                   <div className="rounded-lg bg-gray-50 p-3">
-                    <p className="text-gray-500">Exam avg</p>
-                    <p className="font-bold text-gray-900">{metric(cluster.averageFeatures.averageExamPercent)}</p>
+                    <p className="text-gray-500">Predicted final</p>
+                    <p className="font-bold text-gray-900">{metric(cluster.averageFeatures.predictedFinalPercent)}</p>
                   </div>
                   <div className="rounded-lg bg-gray-50 p-3">
-                    <p className="text-gray-500">Quiz</p>
-                    <p className="font-bold text-gray-900">{metric(cluster.averageFeatures.quizPercent)}</p>
+                    <p className="text-gray-500">KNN confidence</p>
+                    <p className="font-bold text-gray-900">{metric(cluster.averageFeatures.knnConfidencePercent)}</p>
                   </div>
                 </div>
                 <div className="mt-4 space-y-2">
@@ -243,11 +243,12 @@ export default function Dashboard() {
             ))}
           </section>
 
+          {false && (
           <section className={cardClass}>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Priority Students</h2>
+              <h2 className="text-xl font-bold text-gray-900">Prediction Review</h2>
               <p className="text-sm text-gray-500">
-                Students with weaker combined attendance, marks, and quiz pattern.
+                Students are ordered from At Risk to Excellent by their KNN category.
               </p>
             </div>
             <div className="overflow-x-auto">
@@ -256,9 +257,8 @@ export default function Dashboard() {
                   <tr>
                     <th className="px-3 py-3">Student</th>
                     <th className="px-3 py-3">Class</th>
-                    <th className="px-3 py-3">Cluster</th>
-                    <th className="px-3 py-3">Exam avg</th>
-                    <th className="px-3 py-3">Quiz</th>
+                    <th className="px-3 py-3">KNN category</th>
+                    <th className="px-3 py-3">Predicted final</th>
                     <th className="px-3 py-3">Class att.</th>
                     <th className="px-3 py-3">Exam att.</th>
                   </tr>
@@ -279,8 +279,7 @@ export default function Dashboard() {
                           {student.cluster?.label}
                         </span>
                       </td>
-                      <td className="px-3 py-3">{metric(student.features.averageExamPercent)}</td>
-                      <td className="px-3 py-3">{metric(student.features.quizPercent)}</td>
+                      <td className="px-3 py-3">{metric(student.prediction?.predictedFinalPercent)}</td>
                       <td className="px-3 py-3">{metric(student.features.classAttendancePercent)}</td>
                       <td className="px-3 py-3">{metric(student.features.examAttendancePercent)}</td>
                     </tr>
@@ -289,6 +288,7 @@ export default function Dashboard() {
               </table>
             </div>
           </section>
+          )}
         </>
       )}
 
@@ -332,8 +332,7 @@ export default function Dashboard() {
                   <tr>
                     <th className="px-3 py-3">Student</th>
                     <th className="px-3 py-3">Class</th>
-                    <th className="px-3 py-3">Exam avg</th>
-                    <th className="px-3 py-3">Quiz</th>
+                    <th className="px-3 py-3">Predicted final</th>
                     <th className="px-3 py-3">Class att.</th>
                     <th className="px-3 py-3">Exam att.</th>
                   </tr>
@@ -348,8 +347,7 @@ export default function Dashboard() {
                       <td className="px-3 py-3 text-gray-600">
                         {student.faculty.code} · Semester {student.level} · Batch {student.batch}
                       </td>
-                      <td className="px-3 py-3">{metric(student.features.averageExamPercent)}</td>
-                      <td className="px-3 py-3">{metric(student.features.quizPercent)}</td>
+                      <td className="px-3 py-3">{metric(student.prediction?.predictedFinalPercent)}</td>
                       <td className="px-3 py-3">{metric(student.features.classAttendancePercent)}</td>
                       <td className="px-3 py-3">{metric(student.features.examAttendancePercent)}</td>
                     </tr>

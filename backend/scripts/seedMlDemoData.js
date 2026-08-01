@@ -48,30 +48,90 @@ const subjectTemplates = {
   ],
 };
 
-const firstNames = [
-  "Aarav",
-  "Aayusha",
-  "Bibek",
-  "Diya",
-  "Ishan",
-  "Kritika",
-  "Milli",
-  "Niraj",
-  "Pratik",
-  "Ureka",
+const requestedStudentNames = [
+  [
+    "Ureka Gautam", "Milli Rai", "Rupak Olee", "Bishal Panta", "Bishal Gautam",
+    "Joshna Gurung", "Rakib Rehman", "Manish Thapa", "Nishan Nakarmi", "Nischal Shrestha",
+    "Shahil Hussian", "Sudip Adhikari", "Chandra Narayan Chaudhary", "Binita Magar",
+    "Roshni Shrestha", "Sudiccha Shrestha", "Pukar Subedi", "Subash Subedi", "Saugat Basnet",
+  ],
+  [
+    "Anisha Aryal", "Nikesh Adhikari", "Bodhan Dhakal", "Prasuna Shretha", "Kritika Dhital",
+    "Raj Panday", "Bepin Thapa", "Ankit Chaudhary", "Nishan Gurung", "Binod Thapa", "Pradeep Pokhrel",
+  ],
+  [],
+  [],
+  [
+    "Jyoti Chhetri", "Jyoti Shrestha", "Sugam Pokhrel", "Prabin Adhikari", "Binod Pokhrel",
+    "Abishek Bhandari", "Rojan Shahi Thakuri", "Summer Shrestha", "Prabina Magar",
+    "Swastika Pokhrel", "Sandhiya Reezal", "Alisha Kafle", "Esha Shrestha", "Anamika Dangol",
+    "Sujata Basnet", "Suyana Bhandari",
+  ],
 ];
-const lastNames = [
-  "Rai",
-  "Gautam",
-  "Shrestha",
-  "Thapa",
-  "Karki",
-  "Tamang",
-  "Adhikari",
-  "Basnet",
-  "Maharjan",
-  "Poudel",
+
+const generatedFirstNames = [
+  "Aastha", "Aayush", "Abhinav", "Aditi", "Alisha", "Anmol", "Anusha", "Arjun",
+  "Bikash", "Bina", "Chetan", "Dikshya", "Dipesh", "Elina", "Eshan", "Gaurav",
+  "Hema", "Ishwor", "Kabita", "Kiran", "Manisha", "Nabin", "Nikita", "Pranjal",
+  "Rachana", "Rijan", "Saksham", "Sanjana", "Suman", "Tika",
 ];
+const generatedLastNames = [
+  "Acharya", "Bajracharya", "Bhandari", "Bista", "Dahal", "Ghimire", "Joshi", "Kandel",
+  "Khadka", "Koirala", "Lama", "Maharjan", "Neupane", "Poudel", "Rijal", "Shahi",
+  "Shrestha", "Tamang", "Thapa", "Yadav",
+];
+
+const splitName = (name) => {
+  const parts = name.split(" ");
+  return {
+    firstName: parts[0],
+    middleName: parts.length > 2 ? parts.slice(1, -1).join(" ") : "",
+    lastName: parts.at(-1),
+  };
+};
+
+const buildStudentNames = () => {
+  const used = new Set();
+  const generated = generatedLastNames.flatMap((lastName) =>
+    generatedFirstNames.map((firstName) => `${firstName} ${lastName}`),
+  );
+  let generatedIndex = 0;
+  return groups.map((group, groupIndex) =>
+    Array.from({ length: STUDENTS_PER_GROUP }, (_, index) => {
+      const requested = requestedStudentNames[groupIndex]?.[index];
+      if (requested) {
+        used.add(requested.toLowerCase());
+        return requested;
+      }
+      while (used.has(generated[generatedIndex].toLowerCase())) generatedIndex += 1;
+      const nextName = generated[generatedIndex];
+      generatedIndex += 1;
+      used.add(nextName.toLowerCase());
+      return nextName;
+    }),
+  );
+};
+
+const studentNamesByGroup = buildStudentNames();
+
+const teacherNamesBySubject = {
+  BCA1PF: "Sabin Silwal",
+  BCA1MTH: "Amrit Gautam",
+  BCA1DL: "Nirmala Shahi",
+  BCA2PF: "Sabin Silwal",
+  BCA2MTH: "Amrit Gautam",
+  BCA2DL: "Prakash Bista",
+  BBM1POM: "Sita Adhikari",
+  BBM1BM: "Amrit Gautam",
+  BBM1FA: "Bikash Khatri",
+  BBM2POM: "Sita Adhikari",
+  BBM2BM: "Amrit Gautam",
+  BBM2FA: "Bikash Khatri",
+  BBS1BEN: "Ramila Subedi",
+  BBS1ACC: "Bikash Khatri",
+  BBS1ECO: "Ramesh Koirala",
+};
+const teacherNames = [...new Set(Object.values(teacherNamesBySubject))];
 
 const levels = (group) =>
   Array.from({ length: group.maxLevel }, (_, index) => ({
@@ -114,23 +174,39 @@ const ensureFaculty = async (group) => {
   );
 };
 
-const ensureTeacher = async (facultyCode, subjectCode, subjectName, hash) =>
-  Teacher.findOneAndUpdate(
-    { email: `demo.${facultyCode.toLowerCase()}.${subjectCode.toLowerCase()}@examify.local` },
+const ensureTeacher = async (facultyCode, subjectCode, subjectName, hash) => {
+  const fullName = teacherNamesBySubject[subjectCode] || "Sanjay Koirala";
+  const { firstName, middleName, lastName } = splitName(fullName);
+  const username = fullName.toLowerCase().replaceAll(" ", ".");
+  const teacherIndex = Math.max(0, teacherNames.indexOf(fullName));
+  const legacyEmail = `demo.${facultyCode.toLowerCase()}.${subjectCode.toLowerCase()}@examify.local`;
+  return Teacher.findOneAndUpdate(
+    {
+      $or: [
+        { email: `${username}@college.edu.np` },
+        { email: legacyEmail },
+        { username },
+      ],
+    },
     {
       $set: {
-        first_name: "Demo",
-        last_name: `${facultyCode} ${subjectCode}`,
-        mobile_no: `98000${String(Math.floor(Math.random() * 9000) + 1000)}`,
-        address: "Examify demo data",
-        username: `demo.${facultyCode.toLowerCase()}.${subjectCode.toLowerCase()}`,
+        first_name: firstName,
+        middle_name: middleName,
+        last_name: lastName,
+        email: `${username}@college.edu.np`,
+        address: "Kathmandu, Nepal",
+        username,
         password: hash,
         plain_password: password,
         isActive: true,
       },
+      $setOnInsert: {
+        mobile_no: `9801${String(100000 + teacherIndex).slice(-6)}`,
+      },
     },
     { upsert: true, new: true, setDefaultsOnInsert: true },
   );
+};
 
 const ensureSubjectsAndOfferings = async ({ faculty, group, hash }) => {
   const subjects = [];
@@ -180,16 +256,15 @@ const ensureStudents = async ({ faculty, group, hash, groupIndex }) => {
   const students = [];
   for (let index = 0; index < STUDENTS_PER_GROUP; index += 1) {
     const serial = groupIndex * STUDENTS_PER_GROUP + index + 1;
-    const firstName = firstNames[index % firstNames.length];
-    const lastName = lastNames[(index + groupIndex) % lastNames.length];
+    const { firstName, middleName, lastName } = splitName(studentNamesByGroup[groupIndex][index]);
     const studentCode = `DEMO-ML-${String(serial).padStart(3, "0")}`;
-    const username = `demo.ml.${String(serial).padStart(3, "0")}`;
+    const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
     const student = await Student.findOneAndUpdate(
       { std_id: studentCode },
       {
         $set: {
           first_name: firstName,
-          middle_name: "",
+          middle_name: middleName,
           last_name: lastName,
           facultyId: faculty._id,
           current_level: group.level,
@@ -197,7 +272,7 @@ const ensureStudents = async ({ faculty, group, hash, groupIndex }) => {
           academic_status: "active",
           roll_no: index + 1,
           mobile_no: `98${String(40000000 + serial).padStart(8, "0")}`,
-          email: `${username}@examify.local`,
+          email: `${username}@student.college.edu.np`,
           gender: index % 2 === 0 ? "female" : "male",
           blood_group: ["A+", "B+", "O+", "AB+"][index % 4],
           guardian_name: `Guardian ${lastName}`,
