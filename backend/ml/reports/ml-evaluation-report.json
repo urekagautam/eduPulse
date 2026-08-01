@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-07-30T05:19:53.552Z",
+  "generatedAt": "2026-08-01T18:52:12.016Z",
   "dataset": {
-    "rows": 377,
-    "trainRows": 301,
-    "testRows": 76,
+    "rows": 622,
+    "trainRows": 497,
+    "testRows": 125,
     "splitMethod": "Deterministic 80/20 split after sorting by student and target exam",
     "features": [
       "classAttendancePercent",
@@ -27,104 +27,104 @@
     "algorithm": "RandomForestRegressor",
     "purpose": "Predict final exam percentage from academic, quiz, and attendance features.",
     "regression": {
-      "mae": 2.26,
-      "rmse": 4.36
+      "mae": 2.16,
+      "rmse": 3.86
     },
     "classificationReport": {
-      "accuracy": 94.74,
+      "accuracy": 94.4,
       "rows": [
         {
           "className": "At Risk",
-          "precision": 1,
-          "recall": 0.88,
+          "precision": 0.93,
+          "recall": 0.93,
           "f1Score": 0.93,
-          "support": 8
+          "support": 15
         },
         {
           "className": "Average",
-          "precision": 0.83,
-          "recall": 1,
-          "f1Score": 0.91,
-          "support": 15
+          "precision": 0.85,
+          "recall": 0.88,
+          "f1Score": 0.86,
+          "support": 25
         },
         {
           "className": "Good",
           "precision": 0.96,
-          "recall": 0.92,
-          "f1Score": 0.94,
-          "support": 26
+          "recall": 0.93,
+          "f1Score": 0.95,
+          "support": 46
         },
         {
           "className": "Excellent",
           "precision": 1,
-          "recall": 0.96,
-          "f1Score": 0.98,
-          "support": 27
+          "recall": 1,
+          "f1Score": 1,
+          "support": 39
         }
       ],
       "macroAvg": {
-        "precision": 0.95,
+        "precision": 0.93,
         "recall": 0.94,
         "f1Score": 0.94,
-        "support": 76
+        "support": 125
       },
       "weightedAvg": {
-        "precision": 0.95,
-        "recall": 0.95,
-        "f1Score": 0.95,
-        "support": 76
+        "precision": 0.94,
+        "recall": 0.94,
+        "f1Score": 0.94,
+        "support": 125
       }
     },
     "confusionMatrix": [
       [
-        7,
+        14,
         1,
         0,
         0
       ],
       [
-        0,
-        15,
-        0,
-        0
-      ],
-      [
-        0,
+        1,
+        22,
         2,
-        24,
+        0
+      ],
+      [
+        0,
+        3,
+        43,
         0
       ],
       [
         0,
         0,
-        1,
-        26
+        0,
+        39
       ]
     ],
     "binary": {
       "positiveClass": "At Risk",
       "negativeClass": "Not At Risk",
-      "TP": 7,
-      "TN": 68,
-      "FP": 0,
+      "TP": 14,
+      "TN": 109,
+      "FP": 1,
       "FN": 1,
       "confusionMatrix": [
         [
-          68,
-          0
+          109,
+          1
         ],
         [
           1,
-          7
+          14
         ]
       ],
-      "accuracy": 98.68,
-      "precision": 100,
-      "recall": 87.5,
+      "accuracy": 98.4,
+      "precision": 93.33,
+      "recall": 93.33,
       "f1Score": 93.33
     },
     "roc": {
-      "auc": 0.9963,
+      "auc": 0.9939,
       "points": [
         {
           "fpr": 0,
@@ -132,286 +132,470 @@
         },
         {
           "fpr": 0,
-          "tpr": 0.125
+          "tpr": 0.0667
         },
         {
           "fpr": 0,
-          "tpr": 0.25
+          "tpr": 0.1333
         },
         {
           "fpr": 0,
-          "tpr": 0.375
+          "tpr": 0.2
         },
         {
           "fpr": 0,
-          "tpr": 0.5
+          "tpr": 0.2667
         },
         {
           "fpr": 0,
-          "tpr": 0.625
+          "tpr": 0.3333
         },
         {
           "fpr": 0,
-          "tpr": 0.75
+          "tpr": 0.4
         },
         {
           "fpr": 0,
-          "tpr": 0.875
+          "tpr": 0.4667
         },
         {
-          "fpr": 0.0147,
-          "tpr": 0.875
+          "fpr": 0,
+          "tpr": 0.5333
         },
         {
-          "fpr": 0.0294,
-          "tpr": 0.875
+          "fpr": 0,
+          "tpr": 0.6
         },
         {
-          "fpr": 0.0294,
+          "fpr": 0,
+          "tpr": 0.7333
+        },
+        {
+          "fpr": 0,
+          "tpr": 0.8
+        },
+        {
+          "fpr": 0,
+          "tpr": 0.8667
+        },
+        {
+          "fpr": 0.0091,
+          "tpr": 0.8667
+        },
+        {
+          "fpr": 0.0091,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0182,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0273,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0364,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0455,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0545,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0636,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0727,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0818,
+          "tpr": 0.9333
+        },
+        {
+          "fpr": 0.0818,
           "tpr": 1
         },
         {
-          "fpr": 0.0441,
+          "fpr": 0.0909,
           "tpr": 1
         },
         {
-          "fpr": 0.0588,
+          "fpr": 0.1,
           "tpr": 1
         },
         {
-          "fpr": 0.0735,
+          "fpr": 0.1091,
           "tpr": 1
         },
         {
-          "fpr": 0.0882,
+          "fpr": 0.1182,
           "tpr": 1
         },
         {
-          "fpr": 0.1029,
+          "fpr": 0.1273,
           "tpr": 1
         },
         {
-          "fpr": 0.1176,
+          "fpr": 0.1364,
           "tpr": 1
         },
         {
-          "fpr": 0.1324,
+          "fpr": 0.1455,
           "tpr": 1
         },
         {
-          "fpr": 0.1471,
+          "fpr": 0.1545,
           "tpr": 1
         },
         {
-          "fpr": 0.1618,
+          "fpr": 0.1636,
           "tpr": 1
         },
         {
-          "fpr": 0.1765,
+          "fpr": 0.1727,
           "tpr": 1
         },
         {
-          "fpr": 0.1912,
+          "fpr": 0.1818,
           "tpr": 1
         },
         {
-          "fpr": 0.2059,
+          "fpr": 0.1909,
           "tpr": 1
         },
         {
-          "fpr": 0.2206,
+          "fpr": 0.2,
           "tpr": 1
         },
         {
-          "fpr": 0.2353,
+          "fpr": 0.2091,
           "tpr": 1
         },
         {
-          "fpr": 0.25,
+          "fpr": 0.2182,
           "tpr": 1
         },
         {
-          "fpr": 0.2647,
+          "fpr": 0.2273,
           "tpr": 1
         },
         {
-          "fpr": 0.2794,
+          "fpr": 0.2364,
           "tpr": 1
         },
         {
-          "fpr": 0.3088,
+          "fpr": 0.2455,
           "tpr": 1
         },
         {
-          "fpr": 0.3235,
+          "fpr": 0.2545,
           "tpr": 1
         },
         {
-          "fpr": 0.3382,
+          "fpr": 0.2636,
           "tpr": 1
         },
         {
-          "fpr": 0.3529,
+          "fpr": 0.2727,
           "tpr": 1
         },
         {
-          "fpr": 0.3676,
+          "fpr": 0.2818,
           "tpr": 1
         },
         {
-          "fpr": 0.3824,
+          "fpr": 0.2909,
           "tpr": 1
         },
         {
-          "fpr": 0.3971,
+          "fpr": 0.3,
           "tpr": 1
         },
         {
-          "fpr": 0.4118,
+          "fpr": 0.3091,
           "tpr": 1
         },
         {
-          "fpr": 0.4265,
+          "fpr": 0.3182,
           "tpr": 1
         },
         {
-          "fpr": 0.4412,
+          "fpr": 0.3273,
           "tpr": 1
         },
         {
-          "fpr": 0.4559,
+          "fpr": 0.3364,
           "tpr": 1
         },
         {
-          "fpr": 0.4706,
+          "fpr": 0.3455,
           "tpr": 1
         },
         {
-          "fpr": 0.4853,
+          "fpr": 0.3636,
           "tpr": 1
         },
         {
-          "fpr": 0.5147,
+          "fpr": 0.3727,
           "tpr": 1
         },
         {
-          "fpr": 0.5294,
+          "fpr": 0.3818,
           "tpr": 1
         },
         {
-          "fpr": 0.5441,
+          "fpr": 0.4,
           "tpr": 1
         },
         {
-          "fpr": 0.5588,
+          "fpr": 0.4091,
           "tpr": 1
         },
         {
-          "fpr": 0.5735,
+          "fpr": 0.4182,
           "tpr": 1
         },
         {
-          "fpr": 0.5882,
+          "fpr": 0.4273,
           "tpr": 1
         },
         {
-          "fpr": 0.6029,
+          "fpr": 0.4364,
           "tpr": 1
         },
         {
-          "fpr": 0.6176,
+          "fpr": 0.4455,
           "tpr": 1
         },
         {
-          "fpr": 0.6324,
+          "fpr": 0.4636,
           "tpr": 1
         },
         {
-          "fpr": 0.6471,
+          "fpr": 0.4727,
           "tpr": 1
         },
         {
-          "fpr": 0.6618,
+          "fpr": 0.4818,
           "tpr": 1
         },
         {
-          "fpr": 0.6765,
+          "fpr": 0.4909,
           "tpr": 1
         },
         {
-          "fpr": 0.6912,
+          "fpr": 0.5,
           "tpr": 1
         },
         {
-          "fpr": 0.7059,
+          "fpr": 0.5091,
           "tpr": 1
         },
         {
-          "fpr": 0.7206,
+          "fpr": 0.5182,
           "tpr": 1
         },
         {
-          "fpr": 0.7353,
+          "fpr": 0.5273,
           "tpr": 1
         },
         {
-          "fpr": 0.75,
+          "fpr": 0.5364,
           "tpr": 1
         },
         {
-          "fpr": 0.7647,
+          "fpr": 0.5455,
           "tpr": 1
         },
         {
-          "fpr": 0.7794,
+          "fpr": 0.5545,
           "tpr": 1
         },
         {
-          "fpr": 0.7941,
+          "fpr": 0.5636,
           "tpr": 1
         },
         {
-          "fpr": 0.8088,
+          "fpr": 0.5727,
           "tpr": 1
         },
         {
-          "fpr": 0.8235,
+          "fpr": 0.5818,
           "tpr": 1
         },
         {
-          "fpr": 0.8382,
+          "fpr": 0.5909,
           "tpr": 1
         },
         {
-          "fpr": 0.8529,
+          "fpr": 0.6,
           "tpr": 1
         },
         {
-          "fpr": 0.8676,
+          "fpr": 0.6091,
           "tpr": 1
         },
         {
-          "fpr": 0.8971,
+          "fpr": 0.6182,
           "tpr": 1
         },
         {
-          "fpr": 0.9118,
+          "fpr": 0.6273,
           "tpr": 1
         },
         {
-          "fpr": 0.9265,
+          "fpr": 0.6364,
           "tpr": 1
         },
         {
-          "fpr": 0.9412,
+          "fpr": 0.6455,
           "tpr": 1
         },
         {
-          "fpr": 0.9559,
+          "fpr": 0.6545,
           "tpr": 1
         },
         {
-          "fpr": 0.9706,
+          "fpr": 0.6636,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.6727,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.6818,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.6909,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7091,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7182,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7273,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7364,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7455,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7545,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7636,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7727,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.7818,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8091,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8182,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8273,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8364,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8455,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8545,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8636,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8727,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8818,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.8909,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9182,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9273,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9364,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9455,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9545,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9636,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9727,
+          "tpr": 1
+        },
+        {
+          "fpr": 0.9818,
           "tpr": 1
         },
         {
@@ -426,100 +610,100 @@
     "k": 7,
     "purpose": "Classify the student risk category by comparing with nearest labelled records.",
     "classificationReport": {
-      "accuracy": 90.79,
+      "accuracy": 86.4,
       "rows": [
         {
           "className": "At Risk",
-          "precision": 0.86,
-          "recall": 0.75,
-          "f1Score": 0.8,
-          "support": 8
-        },
-        {
-          "className": "Average",
-          "precision": 0.82,
-          "recall": 0.93,
+          "precision": 0.87,
+          "recall": 0.87,
           "f1Score": 0.87,
           "support": 15
         },
         {
-          "className": "Good",
-          "precision": 0.92,
+          "className": "Average",
+          "precision": 0.79,
           "recall": 0.92,
-          "f1Score": 0.92,
-          "support": 26
+          "f1Score": 0.85,
+          "support": 25
+        },
+        {
+          "className": "Good",
+          "precision": 0.9,
+          "recall": 0.8,
+          "f1Score": 0.85,
+          "support": 46
         },
         {
           "className": "Excellent",
-          "precision": 0.96,
-          "recall": 0.93,
-          "f1Score": 0.94,
-          "support": 27
+          "precision": 0.88,
+          "recall": 0.9,
+          "f1Score": 0.89,
+          "support": 39
         }
       ],
       "macroAvg": {
-        "precision": 0.89,
-        "recall": 0.88,
-        "f1Score": 0.89,
-        "support": 76
+        "precision": 0.86,
+        "recall": 0.87,
+        "f1Score": 0.86,
+        "support": 125
       },
       "weightedAvg": {
-        "precision": 0.91,
-        "recall": 0.91,
-        "f1Score": 0.91,
-        "support": 76
+        "precision": 0.87,
+        "recall": 0.86,
+        "f1Score": 0.86,
+        "support": 125
       }
     },
     "confusionMatrix": [
       [
-        6,
+        13,
         2,
         0,
         0
       ],
       [
-        1,
-        14,
+        2,
+        23,
         0,
         0
       ],
       [
         0,
-        1,
-        24,
-        1
+        4,
+        37,
+        5
       ],
       [
         0,
         0,
-        2,
-        25
+        4,
+        35
       ]
     ],
     "binary": {
       "positiveClass": "At Risk",
       "negativeClass": "Not At Risk",
-      "TP": 6,
-      "TN": 67,
-      "FP": 1,
+      "TP": 13,
+      "TN": 108,
+      "FP": 2,
       "FN": 2,
       "confusionMatrix": [
         [
-          67,
-          1
+          108,
+          2
         ],
         [
           2,
-          6
+          13
         ]
       ],
-      "accuracy": 96.05,
-      "precision": 85.71,
-      "recall": 75,
-      "f1Score": 80
+      "accuracy": 96.8,
+      "precision": 86.67,
+      "recall": 86.67,
+      "f1Score": 86.67
     },
     "roc": {
-      "auc": 0.9853,
+      "auc": 0.9867,
       "points": [
         {
           "fpr": 0,
@@ -527,26 +711,26 @@
         },
         {
           "fpr": 0,
-          "tpr": 0.125
+          "tpr": 0.2
         },
         {
-          "fpr": 0.0147,
-          "tpr": 0.25
+          "fpr": 0.0091,
+          "tpr": 0.2667
         },
         {
-          "fpr": 0.0147,
-          "tpr": 0.75
+          "fpr": 0.0091,
+          "tpr": 0.8
         },
         {
-          "fpr": 0.0294,
-          "tpr": 0.875
+          "fpr": 0.0182,
+          "tpr": 0.8667
         },
         {
-          "fpr": 0.0294,
-          "tpr": 1
+          "fpr": 0.0545,
+          "tpr": 0.9333
         },
         {
-          "fpr": 0.0588,
+          "fpr": 0.0909,
           "tpr": 1
         },
         {

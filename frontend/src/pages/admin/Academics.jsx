@@ -11,6 +11,7 @@ import {
   BookOpen,
   Eye,
   EyeOff,
+  Search,
 } from "lucide-react";
 import Button from "../../components/Button";
 import { createFaculty, fetchFaculties } from "../../services/apiFaculty";
@@ -310,6 +311,8 @@ export default function Academics() {
   const [filterFacultyId, setFilterFacultyId] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [filterBatch, setFilterBatch] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [teacherSearch, setTeacherSearch] = useState("");
 
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -468,6 +471,50 @@ export default function Academics() {
     )
       return false;
     return true;
+  });
+
+  const matchesStudentSearch = (student, query) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return true;
+    const searchable = [
+      student.studentId,
+      student.rollNo,
+      student.profile?.firstName,
+      student.profile?.middleName,
+      student.profile?.lastName,
+      student.profile?.email,
+      student.profile?.mobile,
+      student.credentials?.username,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return searchable.includes(normalizedQuery);
+  };
+
+  const displayedStudents = filteredStudents.filter((student) =>
+    matchesStudentSearch(student, studentSearch),
+  );
+
+  const filteredTeachers = teachers.filter((teacher) => {
+    const normalizedQuery = teacherSearch.trim().toLowerCase();
+    if (!normalizedQuery) return true;
+    const assignedSubjectText = getTeacherAssignedSubjects(teacher)
+      .map((subject) => `${subject.name} ${subject.facultyCode}`)
+      .join(" ");
+    const searchable = [
+      teacher.profile?.firstName,
+      teacher.profile?.middleName,
+      teacher.profile?.lastName,
+      teacher.profile?.email,
+      teacher.profile?.phone,
+      teacher.credentials?.username,
+      assignedSubjectText,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return searchable.includes(normalizedQuery);
   });
 
   const handleAddFaculty = async () => {
@@ -946,6 +993,23 @@ export default function Academics() {
                 readOnly
               />
             </div>
+            <div className="flex-1 min-w-60">
+              <label className={labelClass}>Search students</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  className={`${inputClass} pl-10 disabled:cursor-not-allowed disabled:bg-gray-100`}
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  disabled={!filterFacultyId || !filterLevel || !selectedFilterBatch}
+                  placeholder={
+                    !filterFacultyId || !filterLevel || !selectedFilterBatch
+                      ? "Select faculty and semester/year first"
+                      : "Name, ID, username, email, mobile, or roll no."
+                  }
+                />
+              </div>
+            </div>
             <Button
               variant="primary"
               onClick={() => {
@@ -1030,12 +1094,16 @@ export default function Academics() {
                   sem/year.
                 </p>
               </div>
-            ) : filteredStudents.length === 0 ? (
+            ) : displayedStudents.length === 0 ? (
               <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
-                <p className="text-gray-600">No students match this filter.</p>
+                <p className="text-gray-600">
+                  {studentSearch.trim()
+                    ? "No students match your search."
+                    : "No students match this filter."}
+                </p>
               </div>
             ) : (
-              filteredStudents.map((s) => (
+              displayedStudents.map((s) => (
                 <div
                   key={s._id}
                   className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
@@ -1158,7 +1226,19 @@ export default function Academics() {
       {/* Teachers tab */}
       {activeTab === "teachers" && (
         <div className="space-y-6">
-          <div className="flex justify-end">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="w-full sm:max-w-xl">
+              <label className={labelClass}>Search teachers</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  className={`${inputClass} pl-10`}
+                  value={teacherSearch}
+                  onChange={(e) => setTeacherSearch(e.target.value)}
+                  placeholder="Search by name, username, email, phone, or assigned subject"
+                />
+              </div>
+            </div>
             <Button
               variant="primary"
               onClick={() => {
@@ -1220,12 +1300,16 @@ export default function Academics() {
           )}
 
           <div className="space-y-4">
-            {teachers.length === 0 ? (
+            {filteredTeachers.length === 0 ? (
               <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
-                <p className="text-gray-600">No teachers added yet.</p>
+                <p className="text-gray-600">
+                  {teacherSearch.trim()
+                    ? "No teachers match your search."
+                    : "No teachers added yet."}
+                </p>
               </div>
             ) : (
-              teachers.map((t) => {
+              filteredTeachers.map((t) => {
                 const assignedSubjects = getTeacherAssignedSubjects(t);
                 return (
                   <div
