@@ -293,10 +293,6 @@ export default function StudentPerformanceDetail() {
                 </div>
               ))}
             </div>
-            <p className="mt-4 text-xs text-gray-500">
-              {prediction.algorithm} · {prediction.trainedSampleCount || 0} labelled rows ·{" "}
-              {prediction.note}
-            </p>
           </>
         ) : (
           <div className={emptyClass}>
