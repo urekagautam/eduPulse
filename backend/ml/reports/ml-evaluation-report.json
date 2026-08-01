@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-01T19:09:30.653Z",
+  "generatedAt": "2026-08-01T22:31:02.325Z",
   "dataset": {
     "rows": 622,
     "trainRows": 497,
@@ -27,31 +27,31 @@
     "algorithm": "RandomForestRegressor",
     "purpose": "Predict final exam percentage from academic, quiz, and attendance features.",
     "regression": {
-      "mae": 2.25,
-      "rmse": 3.99
+      "mae": 2.36,
+      "rmse": 4.09
     },
     "classificationReport": {
-      "accuracy": 93.6,
+      "accuracy": 94.4,
       "rows": [
         {
           "className": "At Risk",
-          "precision": 0.87,
-          "recall": 0.93,
-          "f1Score": 0.9,
+          "precision": 0.92,
+          "recall": 0.86,
+          "f1Score": 0.89,
           "support": 14
         },
         {
           "className": "Average",
-          "precision": 0.85,
-          "recall": 0.85,
-          "f1Score": 0.85,
+          "precision": 0.83,
+          "recall": 0.92,
+          "f1Score": 0.87,
           "support": 26
         },
         {
           "className": "Good",
-          "precision": 0.96,
+          "precision": 0.98,
           "recall": 0.93,
-          "f1Score": 0.95,
+          "f1Score": 0.96,
           "support": 46
         },
         {
@@ -63,13 +63,13 @@
         }
       ],
       "macroAvg": {
-        "precision": 0.92,
+        "precision": 0.93,
         "recall": 0.93,
-        "f1Score": 0.92,
+        "f1Score": 0.93,
         "support": 125
       },
       "weightedAvg": {
-        "precision": 0.94,
+        "precision": 0.95,
         "recall": 0.94,
         "f1Score": 0.94,
         "support": 125
@@ -77,15 +77,15 @@
     },
     "confusionMatrix": [
       [
-        13,
-        1,
+        12,
+        2,
         0,
         0
       ],
       [
-        2,
-        22,
-        2,
+        1,
+        24,
+        1,
         0
       ],
       [
@@ -104,35 +104,35 @@
     "binary": {
       "positiveClass": "At Risk",
       "negativeClass": "Not At Risk",
-      "TP": 13,
-      "TN": 109,
-      "FP": 2,
-      "FN": 1,
+      "TP": 12,
+      "TN": 110,
+      "FP": 1,
+      "FN": 2,
       "confusionMatrix": [
         [
-          109,
-          2
+          110,
+          1
         ],
         [
-          1,
-          13
+          2,
+          12
         ]
       ],
       "accuracy": 97.6,
-      "precision": 86.67,
-      "recall": 92.86,
-      "f1Score": 89.66
+      "precision": 92.31,
+      "recall": 85.71,
+      "f1Score": 88.89
     },
     "roc": {
-      "auc": 0.9852,
+      "auc": 0.9833,
       "points": [
         {
           "fpr": 0,
           "tpr": 0
         },
         {
-          "fpr": 0,
-          "tpr": 0.0714
+          "fpr": 0.009,
+          "tpr": 0
         },
         {
           "fpr": 0.009,
@@ -152,19 +152,11 @@
         },
         {
           "fpr": 0.009,
-          "tpr": 0.3571
-        },
-        {
-          "fpr": 0.009,
           "tpr": 0.4286
         },
         {
           "fpr": 0.009,
-          "tpr": 0.5
-        },
-        {
-          "fpr": 0.009,
-          "tpr": 0.5714
+          "tpr": 0.6429
         },
         {
           "fpr": 0.009,
@@ -172,10 +164,6 @@
         },
         {
           "fpr": 0.009,
-          "tpr": 0.7857
-        },
-        {
-          "fpr": 0.009,
           "tpr": 0.8571
         },
         {
@@ -183,8 +171,8 @@
           "tpr": 0.8571
         },
         {
-          "fpr": 0.018,
-          "tpr": 0.9286
+          "fpr": 0.027,
+          "tpr": 0.8571
         },
         {
           "fpr": 0.027,
@@ -215,12 +203,8 @@
           "tpr": 0.9286
         },
         {
-          "fpr": 0.0901,
+          "fpr": 0.0991,
           "tpr": 0.9286
-        },
-        {
-          "fpr": 0.0901,
-          "tpr": 1
         },
         {
           "fpr": 0.0991,
@@ -311,10 +295,6 @@
           "tpr": 1
         },
         {
-          "fpr": 0.2973,
-          "tpr": 1
-        },
-        {
           "fpr": 0.3063,
           "tpr": 1
         },
@@ -339,10 +319,6 @@
           "tpr": 1
         },
         {
-          "fpr": 0.3694,
-          "tpr": 1
-        },
-        {
           "fpr": 0.3784,
           "tpr": 1
         },
@@ -351,7 +327,7 @@
           "tpr": 1
         },
         {
-          "fpr": 0.4054,
+          "fpr": 0.3964,
           "tpr": 1
         },
         {
@@ -367,11 +343,11 @@
           "tpr": 1
         },
         {
-          "fpr": 0.4414,
+          "fpr": 0.4505,
           "tpr": 1
         },
         {
-          "fpr": 0.4505,
+          "fpr": 0.4595,
           "tpr": 1
         },
         {
@@ -479,10 +455,6 @@
           "tpr": 1
         },
         {
-          "fpr": 0.7027,
-          "tpr": 1
-        },
-        {
           "fpr": 0.7117,
           "tpr": 1
         },
@@ -567,7 +539,7 @@
           "tpr": 1
         },
         {
-          "fpr": 0.9189,
+          "fpr": 0.9099,
           "tpr": 1
         },
         {
@@ -591,10 +563,6 @@
           "tpr": 1
         },
         {
-          "fpr": 0.973,
-          "tpr": 1
-        },
-        {
           "fpr": 0.982,
           "tpr": 1
         },
@@ -610,7 +578,7 @@
     "k": 7,
     "purpose": "Classify the student risk category by comparing with nearest labelled records.",
     "classificationReport": {
-      "accuracy": 85.6,
+      "accuracy": 83.2,
       "rows": [
         {
           "className": "At Risk",
@@ -621,16 +589,16 @@
         },
         {
           "className": "Average",
-          "precision": 0.79,
-          "recall": 0.88,
-          "f1Score": 0.84,
+          "precision": 0.77,
+          "recall": 0.77,
+          "f1Score": 0.77,
           "support": 26
         },
         {
           "className": "Good",
-          "precision": 0.9,
+          "precision": 0.84,
           "recall": 0.8,
-          "f1Score": 0.85,
+          "f1Score": 0.82,
           "support": 46
         },
         {
@@ -642,15 +610,15 @@
         }
       ],
       "macroAvg": {
-        "precision": 0.84,
-        "recall": 0.86,
-        "f1Score": 0.85,
+        "precision": 0.82,
+        "recall": 0.83,
+        "f1Score": 0.83,
         "support": 125
       },
       "weightedAvg": {
-        "precision": 0.86,
-        "recall": 0.86,
-        "f1Score": 0.86,
+        "precision": 0.83,
+        "recall": 0.83,
+        "f1Score": 0.83,
         "support": 125
       }
     },
@@ -663,8 +631,8 @@
       ],
       [
         3,
-        23,
-        0,
+        20,
+        3,
         0
       ],
       [
@@ -703,7 +671,7 @@
       "f1Score": 82.76
     },
     "roc": {
-      "auc": 0.9855,
+      "auc": 0.9852,
       "points": [
         {
           "fpr": 0,
@@ -730,7 +698,7 @@
           "tpr": 0.9286
         },
         {
-          "fpr": 0.0991,
+          "fpr": 0.1081,
           "tpr": 1
         },
         {

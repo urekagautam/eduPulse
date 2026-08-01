@@ -1,5 +1,5 @@
 Examify ML Evaluation Report
-Generated: 2026-08-01T19:09:30.653Z
+Generated: 2026-08-01T22:31:02.325Z
 Rows: 622
 Train rows: 497
 Test rows: 125
@@ -10,35 +10,35 @@ Negative class = Average + Good + Excellent
 
 Random Forest Regression Model
 Accuracy: 97.6%
-Precision: 86.67%
-Recall: 92.86%
-F1 Score: 89.66%
-MAE: 2.25 percentage points
-RMSE: 3.99 percentage points
-AUC: 0.9852
-TP: 13
-TN: 109
-FP: 2
-FN: 1
+Precision: 92.31%
+Recall: 85.71%
+F1 Score: 88.89%
+MAE: 2.36 percentage points
+RMSE: 4.09 percentage points
+AUC: 0.9833
+TP: 12
+TN: 110
+FP: 1
+FN: 2
 
 Classification Report for Random Forest Model:
 Class             Precision  Recall  F1-score  Support
 --------------------------------------------------------
-At Risk               0.87    0.93      0.90       14
-Average               0.85    0.85      0.85       26
-Good                  0.96    0.93      0.95       46
+At Risk               0.92    0.86      0.89       14
+Average               0.83    0.92      0.87       26
+Good                  0.98    0.93      0.96       46
 Excellent             1.00    1.00      1.00       39
 --------------------------------------------------------
 accuracy                                0.94      125
-macro avg             0.92    0.93      0.92      125
-weighted avg          0.94    0.94      0.94      125
+macro avg             0.93    0.93      0.93      125
+weighted avg          0.95    0.94      0.94      125
 
 K-Nearest Neighbors Classification Model
 Accuracy: 96%
 Precision: 80%
 Recall: 85.71%
 F1 Score: 82.76%
-AUC: 0.9855
+AUC: 0.9852
 TP: 12
 TN: 108
 FP: 3
@@ -48,13 +48,13 @@ Classification Report for KNN Model:
 Class             Precision  Recall  F1-score  Support
 --------------------------------------------------------
 At Risk               0.80    0.86      0.83       14
-Average               0.79    0.88      0.84       26
-Good                  0.90    0.80      0.85       46
+Average               0.77    0.77      0.77       26
+Good                  0.84    0.80      0.82       46
 Excellent             0.88    0.90      0.89       39
 --------------------------------------------------------
-accuracy                                0.86      125
-macro avg             0.84    0.86      0.85      125
-weighted avg          0.86    0.86      0.86      125
+accuracy                                0.83      125
+macro avg             0.82    0.83      0.83      125
+weighted avg          0.83    0.83      0.83      125
 
 JSON report: D:\eigth_sem\backend\ml\reports\ml-evaluation-report.json
 Random Forest confusion matrix: D:\eigth_sem\backend\ml\reports\random-forest-confusion-matrix.svg

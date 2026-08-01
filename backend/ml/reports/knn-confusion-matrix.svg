@@ -21,10 +21,10 @@
 <text x="426" y="120" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
 <rect x="132" y="156" width="84" height="84" fill="rgb(234,239,255)" stroke="#cbd5e1"/>
 <text x="174" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">3</text>
-<rect x="216" y="156" width="84" height="84" fill="rgb(161,180,255)" stroke="#cbd5e1"/>
-<text x="258" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#ffffff">23</text>
-<rect x="300" y="156" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
-<text x="342" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
+<rect x="216" y="156" width="84" height="84" fill="rgb(172,189,255)" stroke="#cbd5e1"/>
+<text x="258" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">20</text>
+<rect x="300" y="156" width="84" height="84" fill="rgb(234,239,255)" stroke="#cbd5e1"/>
+<text x="342" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">3</text>
 <rect x="384" y="156" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
 <text x="426" y="204" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#111827">0</text>
 <rect x="132" y="240" width="84" height="84" fill="rgb(245,248,255)" stroke="#cbd5e1"/>
