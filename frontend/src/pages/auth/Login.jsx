@@ -18,16 +18,56 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const validateForm = () => {
+    const nextErrors = {};
+    const trimmedIdentifier = identifier.trim();
+
+    if (!trimmedIdentifier) {
+      nextErrors.identifier =
+        role === "admin" ? "Email should not be empty" : "Username should not be empty";
+    } else if (role === "admin" && !/^[^\s@]+@gmail\.com$/i.test(trimmedIdentifier)) {
+      nextErrors.identifier = "Invalid email format";
+    }
+
+    if (!password) {
+      nextErrors.password = "Password should not be empty";
+    }
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const applyLoginError = (message) => {
+    const normalized = String(message || "").toLowerCase();
+    if (normalized.includes("password")) {
+      setFieldErrors({ password: message });
+      return;
+    }
+    if (normalized.includes("email") || normalized.includes("username")) {
+      setFieldErrors({ identifier: message });
+      return;
+    }
+    setError(message || "Login failed. Please check your credentials.");
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
+    setFieldErrors({});
+    if (!validateForm()) return;
+
     setLoading(true);
 
     try {
-      const response = await loginUser({ role, identifier, password });
+      const response = await loginUser({
+        role,
+        identifier: identifier.trim(),
+        password,
+      });
       const userRole = response.data.user.role;
       saveSession({
         token: response.data.token,
@@ -35,7 +75,7 @@ export default function Login() {
       });
       navigate(userRole === "student" ? "/student/notices" : `/${userRole}/dashboard`);
     } catch (err) {
-      setError(err.message || "Login failed. Please check your credentials.");
+      applyLoginError(err.message);
     } finally {
       setLoading(false);
     }
@@ -46,6 +86,12 @@ export default function Login() {
   const fieldPlaceholder = isAdmin
     ? "admin@example.com"
     : "Enter your username";
+  const inputClass = (hasError, extra = "") =>
+    `w-full rounded-2xl border bg-white px-4 py-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 ${
+      hasError
+        ? "border-red-300 focus:ring-red-400"
+        : "border-slate-300 focus:ring-[var(--color-primary)]"
+    } ${extra}`;
 
   return (
     <div className="h-svh overflow-hidden bg-[#f6f8fb] px-4 py-4 text-gray-900 sm:px-6 lg:px-8">
@@ -128,6 +174,7 @@ export default function Login() {
 
             <form
               onSubmit={handleSubmit}
+              noValidate
               className="flex flex-1 flex-col justify-between"
             >
               <div className="space-y-4">
@@ -144,7 +191,13 @@ export default function Login() {
                         <button
                           key={option.value}
                           type="button"
-                          onClick={() => setRole(option.value)}
+                          onClick={() => {
+                            setRole(option.value);
+                            setIdentifier("");
+                            setPassword("");
+                            setError("");
+                            setFieldErrors({});
+                          }}
                           className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs font-bold transition ${
                             role === option.value
                               ? "bg-white text-[var(--color-primary)] shadow-sm"
@@ -169,13 +222,22 @@ export default function Login() {
 
                   <input
                     id="identifier"
-                    type={isAdmin ? "email" : "text"}
+                    type="text"
                     value={identifier}
-                    onChange={(event) => setIdentifier(event.target.value)}
-                    required
+                    onChange={(event) => {
+                      setIdentifier(event.target.value);
+                      setError("");
+                      setFieldErrors((current) => ({ ...current, identifier: "" }));
+                    }}
                     placeholder={fieldPlaceholder}
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-950 placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    aria-invalid={Boolean(fieldErrors.identifier)}
+                    className={inputClass(Boolean(fieldErrors.identifier))}
                   />
+                  {fieldErrors.identifier && (
+                    <p className="mt-2 text-sm font-medium text-red-600">
+                      {fieldErrors.identifier}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -191,10 +253,14 @@ export default function Login() {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      required
+                      onChange={(event) => {
+                        setPassword(event.target.value);
+                        setError("");
+                        setFieldErrors((current) => ({ ...current, password: "" }));
+                      }}
                       placeholder="Enter your password"
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm font-medium text-slate-950 placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      aria-invalid={Boolean(fieldErrors.password)}
+                      className={inputClass(Boolean(fieldErrors.password), "pr-12")}
                     />
                     <button
                       type="button"
@@ -205,6 +271,11 @@ export default function Login() {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
+                  {fieldErrors.password && (
+                    <p className="mt-2 text-sm font-medium text-red-600">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
 
                 {error && (

@@ -16,34 +16,44 @@ export const loginAdmin = async (req, res, next) => {
       : "admin";
     const loginId = (identifier || email || username || "").trim();
 
-    if (!loginId || !password) {
-      throw new ApiError(400, "Username/email and password are required");
+    if (!loginId) {
+      throw new ApiError(400, loginRole === "admin" ? "Email is required" : "Username is required");
+    }
+
+    if (!password) {
+      throw new ApiError(400, "Password is required");
+    }
+
+    if (loginRole === "admin" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginId)) {
+      throw new ApiError(400, "Invalid email address");
     }
 
     let user = null;
-    let invalidMessage = "Invalid username or password";
+    let notFoundMessage = "Username does not exist";
 
     if (loginRole === "admin") {
       user = await Admin.findOne({ email: loginId.toLowerCase() });
-      invalidMessage = "Invalid email or password";
+      notFoundMessage = "Email does not exist";
     } else if (loginRole === "teacher") {
       user = await Teacher.findOne({
         username: loginId.toLowerCase(),
         isActive: true,
       });
+      notFoundMessage = "Teacher username does not exist";
     } else {
       user = await Student.findOne({
         username: loginId.toLowerCase(),
         isActive: true,
         academic_status: { $ne: "graduated" },
       });
+      notFoundMessage = "Student username does not exist";
     }
 
-    if (!user) throw new ApiError(401, invalidMessage);
+    if (!user) throw new ApiError(401, notFoundMessage);
 
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
-      throw new ApiError(401, invalidMessage);
+      throw new ApiError(401, "Incorrect password");
     }
 
     const token = jwt.sign(

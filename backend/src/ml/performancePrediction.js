@@ -557,7 +557,8 @@ export const getStudentPerformancePrediction = async (studentId) => {
   const model = trainedModel || usableSavedModel;
   const modelPrediction = predictWithModel(model, features);
   const fallback = heuristicPrediction(features);
-  const prediction = modelPrediction || fallback;
+  const hasCompletedExamMarks = Number(features.completedExamCount || 0) > 0;
+  const prediction = hasCompletedExamMarks ? modelPrediction || fallback : null;
   const knnRows =
     dataset.length >= DEFAULT_MIN_ROWS ? dataset : await buildLabelledPerformanceDataset();
   const knnModel = trainKnnClassifier(knnRows, FEATURE_NAMES, {
@@ -567,12 +568,16 @@ export const getStudentPerformancePrediction = async (studentId) => {
   const knnPrediction = predictWithKnn(knnModel, features);
 
   return {
-    available: prediction.predictedPercent != null,
-    algorithm: modelPrediction ? "Random Forest" : "Weighted fallback",
+    available: Boolean(prediction?.predictedPercent != null),
+    algorithm: hasCompletedExamMarks
+      ? modelPrediction
+        ? "Random Forest"
+        : "Weighted fallback"
+      : "Insufficient data",
     trainedSampleCount: model?.sampleCount || dataset.length,
     minimumRandomForestRows: MIN_RANDOM_FOREST_ROWS,
-    predictedFinalPercent: prediction.predictedPercent,
-    riskCategory: prediction.riskCategory,
+    predictedFinalPercent: prediction?.predictedPercent ?? null,
+    riskCategory: prediction?.riskCategory || { label: "Unavailable", color: "gray" },
     features,
     metadata,
     knnClassification: {
@@ -586,9 +591,11 @@ export const getStudentPerformancePrediction = async (studentId) => {
         ? "KNN classifies the risk category by comparing this student with the nearest labelled academic records."
         : `Only ${knnRows.length} labelled rows are available. KNN needs at least ${DEFAULT_MIN_ROWS}.`,
     },
-    note: modelPrediction
-      ? "Prediction is generated from labelled rows built from existing semester records."
-      : `Only ${dataset.length} labelled rows are available. Random Forest needs at least ${MIN_RANDOM_FOREST_ROWS}, so a weighted fallback was used.`,
+    note: hasCompletedExamMarks
+      ? modelPrediction
+        ? "Prediction is generated from labelled rows built from existing semester records."
+        : `Only ${dataset.length} labelled rows are available. Random Forest needs at least ${MIN_RANDOM_FOREST_ROWS}, so a weighted fallback was used.`
+      : "Final score prediction will appear after at least one current semester exam mark is entered.",
   };
 };
 
