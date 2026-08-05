@@ -1,4 +1,4 @@
-# Examify Project Notes
+# EduPulse Project Notes
 
 ## ML Demo Data and Evaluation
 
